@@ -1,0 +1,4 @@
+Purpose: to investigate the applicability of affine linear functions as basis for flat
+index computation in multidimensional arrays. Might have novel applications in array slicing,
+but may have performance penalties. Also, possible theoretical digression into correspondence between
+operations on one-dimensional integer 'shape' arrays, and multidimensional array operations.

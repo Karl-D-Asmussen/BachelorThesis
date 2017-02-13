@@ -1,0 +1,11 @@
+*.aux
+*.bcf
+*.idx
+*.ind
+*.run.xml
+*.bbl
+*.ilg
+*.blg
+*.toc
+*.out
+*.log

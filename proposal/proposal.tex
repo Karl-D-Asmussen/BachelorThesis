@@ -1,0 +1,248 @@
+\documentclass[a4paper,11pt,notitlepage]{article}
+
+\input{preamble/packages.tex}
+\input{preamble/fonts.tex}
+\input{preamble/listings.tex}
+\input{preamble/setup.tex}
+\input{preamble/first-mid-last.tex}
+\input{preamble/macros.tex}
+
+\author{Karl D. Asmussen (\texttt{twk181}) at DIKU}
+\addbibresource{refs.bib}
+
+\fancyhf[HL]{bachelor thesis proposal}
+\title{Formalization of \(N\)-dimensional Arrays, Implementation in Rust}
+
+\begin{document}
+\First
+
+\section{Purpose}
+
+To attempt to formally ground classification of operations on \(N\)-dimensional arrays in category
+theory, in order to hopefully expose new insights into \(N\)-dimensional arrays,
+their operations, optimizations, storage, and handling.
+
+To implement a lightweight \(N\)-dimensional array library in Rust\footnote{Most recent
+stable version of \texttt{rustc} and official standard library as of \today, is 1.15.1.}
+using the idiom of dual data types to handle the `owned' heap allocation and the `borrowed' slice,
+focusing on a very expressive slice type.
+
+\section{Motivation}
+
+\(N\)-dimensional arrays are an important concept in numerical computing, used in
+a wide variety of applications, often in the implementation of numerical algorithms and
+linear algebra operations.
+
+Popular and powerful implementations of \(N\)-dimensional arrays are found in Python's NumPy,
+Matlab, GNU Octave, and Mathematica; offering a host of functionality and easy/abstracted interfaces.
+These all have a clear advantage over the `old-school' way of programming numerical algorithms
+by hand in C or FORTRAN.
+
+Unfortunately, to my knowledge, very little work has been done to formalize the operations
+on multidimensional arrays beyond the specialized applications of Tensors, and the two-dimensional
+matrices of linear algebra. Most libraries are designed from strictly practical standpoints, including
+functionality at such a time as it becomes pertinent to the user base, or more generally as the author's
+intuition seems to require it.
+
+The most abstract work I have encountered regarding the semantics of \(N\)-dimensional arrays, is the
+explanation of broadcasting rules in NumPy\cite{scipy17}. It goes in depth with a rather convenient format
+for interpreting how scalars interact in multidimensional contexts, as well as how lower-dimensional arrays
+can `stand in' for higher dimensions.
+
+What I aim to do, is provide a theory that explains why broadcasting is useful and makes sense.
+
+The choice of programming language is owed to Rust's excellent polymorphism and memory safety
+features, making it easy to work with array slices without fear of accessing invalid memory. In
+simple terms, because of Rust's unique static lifetime analysis, it is impossible for a
+reference to outlive what it refers to, without relying on garbage collection.
+(Also, data-races are impossible as well.)
+
+Because of the safe reference semantics, Rust's standard library has an idiom of each
+array-like collection having a slice type associated. See Table~\ref{tab:slice-types}
+
+\begin{table}
+  \begin{center}
+    \begin{minipage}{0.8\textwidth}
+      \begin{center}
+        \ttfamily
+        \begin{tabular}{r | l}
+          \rmfamily Allocation type & \rmfamily Slice type \\\hline
+          Vec<T> & \&[T] \\
+          Box<T> & \&[T] \\
+          String & \&str \\
+          PathBuf & \&Path \\
+          OsString & \&OsStr \\
+          OsString & \&OsStr \\
+          CString & \&CStr \\
+        \end{tabular}
+      \end{center}
+      \caption[Rust slice type idiom]{Illustration of the rust slice type idiom. The \texttt{\&} denotes
+      a reference type (non-arithmetic, non-null pointer.)}
+      \label{tab:slice-types}
+    \end{minipage}
+  \end{center}
+\end{table}
+
+My primary inspirations for working on this project is Python's NumPy library and
+the APL-programming language family. NumPy provides a model for translating the rather
+obscure functionality of APL into modern programming languages, while APL long ago broke
+much new ground in what kinds of array operations are possible.\footnote{Disclaimer: I do not wish to encroach on the territory of obtusely terse, non-ASCII
+syntax.}
+
+\section{Method}
+
+Theoretically, I'm looking at modeling multidimensional arrays as something akin to a
+free functor construction in category theory. This functor, essentially, takes a set to
+the subcategory of multidimensional arrays over elements of that set, and it takes a
+function to the common map-operation.
+
+The unexplored territory is then to observe what operations on multidimensional arrays map
+to the identity function in Set. In other words, the operations that one can perform on an
+array, independently of its type --- the manipulations of arrays characterized by e.g. transposition
+of matrices, slicing, replication, and so forth.
+
+To characterise these manipulations, I wish to establish a correspondence between the
+array operations, and the resulting effect on the shape-list of the arrays.
+
+Practically, I hope to implement multidimensional arrays as a polymorphic type in Rust,
+and work with making a powerful array/array-slice type pair, in lieu of the Rust idiom of
+having allocated `owned' types, and light `slice' types. The more operation can be embedded
+in the slice type, the less allocations are needed.
+
+Here, I'm hoping to work with an idea of modeling slices with a list of the bounds on
+each index, and an affine functional to transform a list of indexes into an index into a flat
+array.
+
+Additionally, it may be prudent to work with lazy constructions to avoid computing enormous
+outer products when one only wants the diagonal (see motivating example below.)
+
+\subsection{Motivating theoretical example: matrix product}
+
+The product of two matrices \(\brm A, \brm B\) exists only when \(\brm A\) has as many columns
+as \(\brm B\) has rows. Matrices are (often times) 2-dimensional arrays of real numbers,
+so we describe their shape lists as \(\brm A : n \times m, \; \brm B : m \times p\).
+
+The product will then be \(\brm A \brm B = \brm C : n \times p\).
+
+Computationally this is done by combining every row of \(\brm A\) with every column
+of \(\brm B\) by way of the inner product on vectors.
+
+But focusing on the shapes of the matrices, we combined \(n \times m\) and \(m \times p\) and
+got \(n \times p\), which seems to skip a few steps.
+
+I posit that there are in fact three steps involved: an operation similar to the outer product,
+extracting a diagonal, and a fold-operation.
+
+The outer product of two vectors is the combination of every component in the first vector,
+by way of salar multiplication, with the second vector (or vice versa.) For convenience,
+the resulting vectors are stored as the rows (or columns) of a matrix. The outer product
+of two 1-dimensional arrays is thus a 2-dimensional array.
+
+The outer product of two matrices is the combination of every entry of the first matrix, by
+way of scalar multiplication, with the second (or vice versa.) Thus we get a grid of matrices:
+
+\begin{align*}
+  \brm A \otimes \brm B = \begin{bmatrix}
+    a_{11} \brm B & \cdots & a_{1m} \brm B \\
+    \vdots & \ddots & \vdots \\
+    a_{n1} \brm B & \cdots & a_{nm} \brm B \\
+  \end{bmatrix} = \begin{bmatrix}
+    \brm A b_{11} & \cdots & \brm A b_{1p} \\
+    \vdots & \ddots & \vdots \\
+    \brm A b_{m1} & \cdots & \brm A b_{mp} \\
+  \end{bmatrix}
+\end{align*}
+
+and it is obvious that the outer product of two matrices is a 4-dimensional array and
+that this has the shape: \(\brm A \otimes \brm B : n \times m \times m \times p\)
+
+The diagonal of a matrix \(\brm M : n \times n\) is the sequence \(M_1 = m_{11}, M_2 = m_{22}, \dots, M_n = m_{nn}\).
+Only square matrices has `proper' diagonals, and one achieves the diagonal by traversing the two indexes into the
+matrix (row, column) in lockstep. This reduces the two-dimensional \(\brm M : n \times n\) to \(M : n\).
+
+Applying this operation to the outer product gives us \(\operatorname{diagonal}\brm A \otimes \brm B : n \times m \times p\).
+Notice that \((\operatorname{diagonal} \brm A \otimes \brm B)_{ijk} = a_{ij} b_{jk}\), which looks very similar to the
+Einstein notation for matrix products.
+
+Indeed, the last operaiton is to remove the middle index, \(m\), by way of summing over it. This operation is
+commonly known as the `reduce' of the map-reduce algorithm fame, and is available in many libraries to do with
+lists. This leads to the final expression of the matrix product as
+\((\brm A \brm B)_{ik} = \sum_{j} (\operatorname{diagonal} \brm A \otimes \brm B)_{ijk}\). 
+
+This breaks the otherwise fundamental matrix product up into three `atomic' operations. Notice even,
+that the extract-diagonal-and-sum operation if used on a square matrix is exactly the trace of said matrix.
+
+\subsection{Motivating practical example: memory addressing in X86 assembly}
+
+The memory addressing arithmetic found in the X86 assembly language, and prominently
+accessible as a first-class arithmetic operation in the \texttt{lea} instruction family,
+provides a minimal example for using an affine functional to index multidimensional arrays.
+
+Recall that a functional is a linear function from a vector space to scalars. These exactly mirror
+vectors, and indeed can be identified as the functions one get from taking the inner product with
+a specific vector:
+
+\begin{align*}
+  f_{\brm v}(\brm x) = \brm v \cdot \brm x
+\end{align*}
+
+The set of roots in a linear functional form a hyperplane in the vector space, which includes the origin,
+and is perpendicular to the vector used as referece.
+
+An affine linear functional is a linear functional that adds a constant as well:
+
+\begin{align*}
+  f_{\brm v}(\brm x) = \brm v \cdot \brm x + b =
+  \begin{bmatrix} \brm v \\ b \end{bmatrix}\cdot\begin{bmatrix} \brm x \\ 1 \end{bmatrix}
+\end{align*}
+
+The \texttt{lea} instruction allows for three parameters: a base, an index, and a constant scalar,
+(in the GNU syntax):
+
+\begin{lstlisting}[style=x86_64]
+        leaq (%rbp, %rdx, 4), %rsi # rsi = rbp + (4 * rdx)
+\end{lstlisting}
+
+\texttt{lea} takes three parameters; an array register, an index register,
+and a constant scale. The scale can be one of 1, 2, 4, and 8. In the above example the
+base pointer (\texttt{rbp}) serves as the array, the data register (\texttt{rdx}) serves
+as the index, and the scale is 4.\footnote{Technically, one can also add a constant, but
+this is less relevant in my theory.}
+
+Thus, we are actually computing the following inner product:
+
+\begin{align*}
+  rsi = \begin{bmatrix} 4 \\ rbp \end{bmatrix} \cdot \begin{bmatrix} rdx \\ 1 \end{bmatrix}
+\end{align*}
+
+This is a poignant example of how an affine functionals are already used to compute array
+indexes, and serves as motivation to extend this idea.
+
+Things to consider is, that we want each \(N\)-dimensional index to uniquely correspond to
+a flat index. Ergo, the scales for each index need to have the nature of a multiple-radix number
+system.
+
+In the base-10 number system, each digit has the values \(0\dots9\) and each position's multiplier
+scales by 10. In a multiple-radix number system, each digit has its own radix, and each position has
+its multiplier scale by that radix.
+
+This means that the number \(825_{10,4,9}\) is \(5 \times 1 + 2 \times 9 + 8 \times (9 \times 4) = 331_{10}\) ---
+the scale for a given digit is the product of all preceding radices.
+
+Ensuring that this property holds becomes tricky if one allows swapping the order of indexes. Swapping
+indexes is essentially a generalization of the matrix transpose.
+
+\section{Expected Result}
+
+Ideally, I will arrive at a formal description of the category of multidimensional arrays over sets.
+This will require finding an appropriate formalism for the `allowed' and `disallowed' intuitive notions
+of array operations.
+
+I also wish to put together a usable, if bare-bones multidimensional array library in Rust which utilizes the
+formalism, and the affine functional model of multi-to-single index conversion to implement as much functionality
+as possible in the `slice' layer.
+
+\Middle
+
+\Last
+\end{document}

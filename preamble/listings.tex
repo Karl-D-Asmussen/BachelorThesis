@@ -1,0 +1,101 @@
+\lstdefinelanguage{Rust}{
+  morekeywords={abstract, alignof, as, become, box, break, const, continue, crate, do, else, enum, extern, false, final, fn, for, if, impl, in, let, loop, macro, match, mod, move, mut, offsetof, override, priv, proc, pub, pure, ref, return, Self, self, sizeof, static, struct, super, trait, true, type, typeof, unsafe, unsized, use, virtual, where, while, yield},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+}
+\lstdefinestyle{RustPrelude}{
+  emph={Copy, Send, Sized, Sync,
+  Drop, Fn, FnMut, FnOnce,
+  Box,
+  ToOwned,
+  Clone,
+  PartialEq, PartialOrd, Eq, Ord,
+  AsRef, AsMut, Into, From,
+  Default,
+  Iterator, Extend, IntoIterator, DoubleEndedIterator, ExactSizeIterator,
+  Option, Some, None,
+  Result, Ok, Err,
+  SliceConcatExt,
+  String, str, ToString,
+  Vec},
+}
+\lstdefinelanguage[x86_64gas]{Assembler}[x86masm]{Assembler}{
+  alsoletter={.\%},
+  alsodigit={\$},
+  deletecomment=[l];,
+  deletestring=[b]',
+  morecomment=[l]\#,
+  morecomment=[s]{/*}{*/},
+  deletekeywords=[2]{
+    .align, .alpha, assume, byte, code, comm, comment, .const, 
+    .cref, .data, .data?, db, dd, df, dosseg, dq, dt, dw, dword, else, end, endif, 
+    endm, endp, ends, eq, equ, .err, .err1, .err2, .errb, .errdef, .errdif, 
+    .erre, .erridn, .errnb, .errndef, .errnz, event, exitm, extrn, far, 
+    .fardata, .fardata?, fword, ge, group, gt, high, if, if1, if2, ifb, ifdef, 
+    ifdif, ife, ifidn, ifnb, ifndef, include, includelib, irp, irpc, label, 
+    .lall, le, length, .lfcond, .list, local, low, lt, macro, mask, mod, .model, 
+    name, ne, near, offset, org, out, page, proc, ptr, public, purge, qword, .
+    radix, record, rept, .sall, seg, segment, .seq, .sfcond, short, size, 
+    .stack, struc, subttl, tbyte, .tfcond, this, title, type, .type, width, 
+    word, .xall, .xcref, .xlist
+  },
+  morekeywords=[2]{
+    .abort, .align, .app-file, .ascii, .asciz, .balign, .byte, .comm,
+    .data, .def, .desc, .dim, .double, .eject, .else, .endef, .endif, .endm,
+    .equ, .equiv, .err, .extern, .file, .fill, .float, .global, .globl,
+    .hword, .ident, .if, .include, .int, .irp, .irpc, .lcomm, .lflages,
+    .line, .linkonce, .ln, .mri, .list, .long, .macro, .nolist, .octa, 
+    .org, .p2align, .psize, .quad, .rept, .sbttl, .scl, .section, .set,
+    .short, .single, .size, .sleb128, .skip, .spacce, .stabd, .stabn, .stabs,
+    .string, .symver, .tag, .text, .title, .type, .val, .uleb128, .word
+  },
+  morekeywords={
+    CDQE, CQO, CMPSQ, CMPXCHG16B, IRETQ, JRCXZ, LODSQ, MOVSXD, POPFQ, PUSHFQ, RDTSCP, SCASQ, STOSQ, SWAPGS,
+    MOVQ, ADDQ, SUBQ, CMPQ, TESTQ,
+    rax, rbx, rcx, rdx, rsp, rbp, rsi, rdi, rip,
+     r8,  r8d,  r8w,  r8b, 
+     r9,  r9d,  r9w,  r9b, 
+    r10, r10d, r10w, r10b, 
+    r11, r11d, r11w, r11b, 
+    r12, r12d, r12w, r12b, 
+    r13, r13d, r13w, r13b, 
+    r14, r14d, r14w, r14b, 
+    r15, r15d, r15w, r15b, 
+  }
+}
+\lstdefinestyle{x86_64}{
+  language=[x86_64gas]Assembler,
+  style=Normal,
+}
+\lstdefinelanguage{APL}{
+  morestring=[b]',
+  morecomment=[l]⍝,
+  otherkeyword={⌶,⌷,⌸,⌹,⌺,⌻,⌼,⌽,⌾,⌿,⍀,⍁,⍂,⍃,⍄,⍅,⍆,⍇,⍈,⍉,⍊,⍋,⍌,⍍,⍎,⍏,⍐,⍑,⍒,⍓,⍔,⍕,⍖,⍗,⍘,⍙,⍚,⍛,⍜,⍞,⍟,⍠,⍡,⍢,⍣,⍤,⍥,⍦,⍧,⍨,⍩,⍪,⍫,⍬,⍭,⍮,⍯,⍰,⍱,⍲,⍳,⍴,⍵,⍶,⍷,⍸,⍹,⍺,⎕},
+}
+\lstdefinestyle{APL385}{
+  basicstyle=\footnotesize\apltt,
+}
+\lstdefinestyle{Normal}{
+  frame=single,
+  basicstyle=\footnotesize\ttfamily,
+  numbers=left,
+  numbersep=5pt,
+  tabsize=2,
+  showstringspaces=false, 
+  keywordstyle=\color{blue},
+  stringstyle=\color{orange!50!black},
+  emphstyle=\color{green!50!black},
+}
+\lstdefinestyle{Rust}{
+  language=Rust,
+  style=Normal,
+  style=RustPrelude,
+}
+\lstdefinestyle{APL}{
+  language=APL,
+  style=Normal,
+  style=APL385,
+}

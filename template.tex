@@ -1,0 +1,37 @@
+\documentclass[a4paper,11pt,notitlepage]{article}
+
+\input{preamble/all.tex}
+ 
+\author{Karl D. Asmussen (\texttt{twk181})}
+\date{\today}
+\title{Title}
+%\addbibresource{refs.bib}
+
+\begin{document}
+
+\First
+
+\begin{tikzpicture}[scale=0.5]
+  \begin{dot2tex}[dot,tikz,codeonly,styleonly,options=-s -tmath]
+    digraph G {
+      Q [texlbl="$Q$"];
+      A [texlbl="$A$"];
+      AB [texlbl="$A \times B$"];
+      B [texlbl="$B$"];
+
+      A -> AB [texlbl="$\pi_1$",dir=back]; 
+      AB -> B [texlbl="$\pi_2$"]; 
+      Q -> AB [texlbl="$f\times g$"]; 
+      Q -> B [texlbl="$g$"]; 
+      Q -> A [texlbl="$f$"]; 
+      
+      {rank=same; A;AB;B}
+    }
+  \end{dot2tex}
+\end{tikzpicture}
+
+\Middle
+
+\Last
+
+\end{document}

@@ -9,3 +9,5 @@
 *.toc
 *.out
 *.log
+texput.log
+*.pdf

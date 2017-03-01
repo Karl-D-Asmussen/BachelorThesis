@@ -4,10 +4,18 @@
 
 \setlength\parindent{0pt}
 \setlength\parskip{0.5em}
-\setlength\parskip{0.5em}
+\setlength\absparindent{0em}
+\setlength\absparsep{0.5em}
+
 \titlespacing*{\section}{0pt}{2\baselineskip}{1\baselineskip}
 \titlespacing*{\subsection}{0pt}{1.5\baselineskip}{0.5\baselineskip}
 \titlespacing*{\subsubsection}{0pt}{1\baselineskip}{0.25\baselineskip}
+
+\makeatletter
+\renewcommand{\l@section}{\bfseries\@dottedtocline{1}{0em}{0em}\mdseries}
+\renewcommand{\l@subsection}{\@dottedtocline{2}{2em}{0em}}
+\renewcommand{\l@subsubsection}{\itshape\@dottedtocline{3}{4em}{0em}\upshape}
+\makeatother
 
 \isodate
 \isodash{--}

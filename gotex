@@ -57,12 +57,7 @@ def docopt
 end
 
 def filecheck
-  if File.exist?($OPT['FILE']) && File.extname($OPT['FILE']) == '.tex'
-    $OPT['FILE'] = File.basename $OPT['FILE']
-    nil
-  elsif File.exist?($OPT['FILE'] + '.tex')
-    nil
-  else
+  unless File.exist?($OPT['FILE'] + '.tex')
     $stderr.puts "Cannot find #{$OPT['FILE']}.tex"
     exit 1
   end

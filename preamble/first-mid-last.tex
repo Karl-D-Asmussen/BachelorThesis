@@ -1,4 +1,4 @@
-\newcommand\First{%
+\newcommand\First[1]{%
 %\renewcommand\thesection{\arabic{section}}%
 \renewcommand\thesection{}%
 %\renewcommand\thesubsection{\arabic{section}.\arabic{subsection}}%
@@ -6,13 +6,13 @@
 %\renewcommand\thesubsubsection{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}%
 \renewcommand\thesubsubsection{}%
 \maketitle%
-\renewcommand\cftsecleader{\cftdotfill{\cftdotsep}}%
+#1%
 \tableofcontents%
 }
 
-\newcommand\Middle{%
+\newcommand\Middle[1]{%
 \vfill%
-\begin{center}End.\end{center}%
+#1%
 \clearpage%
 \appendix%
 \phantomsection%
@@ -26,11 +26,12 @@
 \fancyhf[HL]{appendix}%
 }
 
-\newcommand\Last{%
+\newcommand\Last[1]{%
 \phantomsection%
 \addcontentsline{toc}{section}{References, Lists \& Indexes}%
 \printbibliography%
 \ifnum\value{figure}>0\listoffigures\fi%
 \ifnum\value{table}>0\listoftables\fi%
 \printindex%
+#1%
 }

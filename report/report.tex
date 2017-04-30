@@ -1,0 +1,281 @@
+\documentclass{DIKU-report}
+
+\usepackage[titelside, nat, farve]{ku-forside}
+\opgave{Bachelorproject}
+\forfatter{Karl D. Asmussen}
+\titel{Multidimensional Arrays}
+\undertitel{Formally Specified and Cleverly Sliced}
+\vejleder{Jyrki Katajainen}
+\dato{\today}
+
+\titlehead{Multidimensional Arrays: Formally Specified and Cleverly Sliced}
+\authorhead{Karl D. Asmussen}
+
+\dates{March 2017}
+
+\usepackage[backend=biber,]{biblatex}
+\usepackage{makeidx}
+\addbibresource{refs.bib}
+\makeindex
+
+\usepackage{fontspec}
+\usepackage[english]{babel}
+
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[linktocpage=true]{hyperref}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{bm}
+
+\twolevelnumbering{lemma}
+\twolevelnumbering{definition}
+\twolevelnumbering{remark}
+\twolevelnumbering{theorem}
+\twolevelnumbering{observation}
+\twolevelnumbering{example}
+
+\newcommand\brm[1]{\bm{\mathrm{#1}}}
+\let\mrm\mathrm
+\newcommand\Nat{\mathbb{N}}
+\newcommand\Real{\mathbb{R}}
+\newcommand\Com{\mathbb{C}}
+\newcommand\sharpeq{\stackrel{\sharp}{=}}
+\newcommand\prodeq{\stackrel{\times}{=}}
+\newcommand\flateq{\stackrel{\flat}{=}}
+\newcommand\then{\mathrel{\Rightarrow}}
+\newcommand\contradict{\def\qed{\hspace*{\fill}\raisebox{-.2ex}{\lightning}}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  % overview
+  We attempt to formalise multidimensional arrays in a category theoretical
+  setting and provide an example library implementation in Rust.
+  % specific problem
+  Many libraries exist to provide support for multidimensional data-sets, but all
+  of them are based on ad-hoc premises.
+  % review of existing solutions
+  Library implementations seen in NumPy, Matlab, Mathematica and R, are all
+  perfectly servicable, but all function on different semantics.
+  % outline of solution
+  By formalizing operations on multidimensional arrays, we may be able to
+  describe the differing semantics of other libraries.
+  % evalutation parameters
+  In the end, we stress test knowledge and implementation, by applying it to
+  a bachelor-level statistics problem and implementing a linear algebra algorithm.
+\end{abstract}
+
+\begin{keywords}
+  Data Structure, N-d Array, Numerical Computing, Rust, NumPy
+\end{keywords}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\chapter{Formalization}
+
+\section{Motivation}
+
+Arrays-of-arrays are a ubiquitous data structure in computer vision,
+computer graphics, numerical computation. They model matrices in linear algebra,
+image data, multidimensional data-sets in statistical analyses.
+
+They are found in various more-or-less user friendly library implementations;
+the least of which is the regular \texttt{double my\_C\_array[\textit{N}][\textit{M}]} of
+C, or the \texttt{real*8, dimension (\textit{N}, \textit{M}) :: my\_F\_array} of Fortran.
+
+More pleasant libraries are found in computer algebra systems: NumPy/SciPy, Matlab,
+R, Mathematica, and the like. These are all excellent abstractions over
+writing your nested loops by hand, and provide large libraries of useful functions.
+
+There is also the array programming languages, such as APL, J and K, which provide
+much the same functionality, but in far fewer keystrokes.
+
+The first and most obvious problems is that none of these libraries are interoperable
+at the library level: apart from NumPy taking direct inspiration from Matlab, they
+all have different ways to work with the data stored in arrays.
+
+Even C and Fortran don't agree; the address of \texttt{my\_C\_array[0][0]} is next
+to \texttt{my\_C\_array[0][1]}, while the same is true of \texttt{my\_F\_array (0, 0)}
+and \texttt{my\_F\_array (1, 0)}.
+
+This anarchy of convetion is indicative of the way each of these libraries and
+languages came about: ad hoc. Each have been more concerned with practical applications
+at every step of their design.
+
+In the absence of theory, many designs have arisen, seemingly with little common
+ground. It is reasonable to think there is a unifying theory behind these many associated
+models, and that is what we will explore in this chapter.
+
+\section{Arrays}
+
+\begin{definition}
+  \label{def:finseq}
+  A finite sequence drawn from a set \(S\) is a function \(s : \Nat_{<k} \to S\),
+  where \(\Nat_{<k}\) is the set \(\{ n \in \Nat \mid n < k \}\).
+\end{definition}
+
+\begin{definition}
+  \label{def:array}
+  An \(n\)-dimensional array over a set \(S\) generalizes a finite sequence and
+  is a function \(A : \Nat_{<k_1} \times \Nat_{<k_2} \times \cdots \times \Nat_{<k_n} \to S\).
+  The finite sequence \(k_1, k_2, \dots, k_n\) is called the \emph{shape} of the array, denoted
+  \(\sharp A : \Nat_{<n} \to \Nat\), while \(n\) is called the \emph{rank}.
+\end{definition}
+
+\begin{observation}
+  \label{ob:rank}
+  From this defintiion, the rank \(n\) of an array \(A\) can be found by taking the
+  shape of the shape, \(\sharp\sharp A\). This technically gives us a finite sequence
+  \(f : \Nat_{<1} \to \Nat\), which has the property (and complete definition) that \(f(0) = n\).
+\end{observation}
+
+\begin{remark}
+  \label{rem:scalar}
+  When we deal with arrays that have unit shape, we shall not make special effort
+  to notationally distinguish them from scalars when it is clear from context that
+  the conversion is implicit.
+\end{remark}
+
+\begin{example}
+  \label{ex:syntax}
+  For the remainder of this report, we shall adopt a familiar syntax for arrays:
+  \begin{align*}
+    A = [ x_1\; x_2\; \dots \; x_k ] \quad \text{and} \quad
+    B = \begin{bmatrix}
+      y_{1,1} & \cdots & y_{1,n} \\
+      \vdots & \ddots & \vdots \\
+      y_{m,1} & \dots  & y_{m,n} 
+    \end{bmatrix}
+  \end{align*}
+  where
+  \begin{align*}
+    \sharp A = [k] \quad \text{and} \quad \sharp B = [ m\; n ] && .
+  \end{align*}
+  Indexing of arrays will be denoted with function-call notation, as in Fortran:
+  \begin{align*}
+    A(n) = x_n \quad \text{and} \quad B(m,n) = y_{m,n} && .
+  \end{align*}
+  We will also use familiar terminology from linear- and tensor algebra.
+\end{example}
+
+\begin{definition}
+  \label{def:sheq} 
+  We denote that two arrays \(A, B\) are of the same shape \(\sharp A = \sharp B\)
+  by writing \(A \sharpeq B\).
+\end{definition}
+
+\begin{definition}
+  \label{def:reshape-comp} 
+  Two array shapes, \(\sharp A\) and \(\sharp B\) are reshape-compatible, iff the product
+  of their entries are equal. We denote this relationship by 
+  \begin{align*}
+    \sharp A \prodeq \sharp B \iff
+    \prod_{i} (\sharp A)(i) = \prod_{i} (\sharp B)(i)
+  \end{align*}
+\end{definition}
+
+\begin{theorem}
+  \label{the:reshape-comp-eq}
+  Reshape compatibility, \(\sharp A \prodeq \sharp B\) is an equivalence relation. 
+\end{theorem}
+
+\begin{proof}
+  The definition of reshape-compatibility, is based directly on equality
+  on natural numbers, which is trivially an equivalence relation.
+\end{proof}
+
+\begin{definition}
+  \label{def:flat}
+  The ordered traversal of an array \(A : \Nat_{<x_1} \times \cdots \times \Nat_{<x_n} \to S\) is
+  a finite sequence \(\flat A : \Nat_{<k} \to S\) where \(k = \prod_i x_i\). This finite sequence
+  traverses the original array in lexicographical order over \(\Nat_{<x_1} \times \cdots \times \Nat_{<x_n}\).
+\end{definition}
+
+\begin{definition}
+  \label{def:reshape-equiv}
+  Two arrays are the reshapes of one another when \(\flat A = \flat B\). This of course
+  implies reshape-compatibility. We may occasionally write \(A \flateq B\) for short.
+\end{definition}
+
+\begin{theorem}
+  \label{the:unique-reshape}
+  Given an array \(A\) and a shape \(\rho\), where \(\sharp A \prodeq \rho\), there is a unique
+  array \(B\) with \(\sharp B = \rho\) and \(A \flateq B\).
+\end{theorem}
+\begin{proof}
+  Suppose there exists \(B_1, B_2\) where \(\sharp B_1 = \sharp B_2 = \rho\)
+  and \(B_1 \flateq B_2 \flateq A\) and \(B_1 \neq B_2\).
+  
+  This implies that there exists \(\brm x = [x_1\; \dots x_n]\) where \(\sharp \brm x = \sharp \rho\),
+  such that \(B_1(\brm x) \neq B_2(\brm x)\).
+
+  This implies that there exists \(k\) as per the ordering scheme
+  described in definition \ref{def:flat} so that \(B_1(\brm x) = \flat B_1 (k)\) and
+  \(B_2(\brm x) = \flat B_2 (k)\) and hence \(\flat B_1(k) \neq \flat B_2(k)\). \contradict
+\end{proof}
+
+\begin{definition}
+  The reshape function \(\varrho(A, \rho)\) takes an array and a reshape-compatible shape
+  to the corresponding unique rehsaped array as per theorem \ref{the:unique-reshape}.
+\end{definition}
+
+\section{Categorical setting}
+
+\begin{definition}
+  Let the groupoid of products \(\Nat\brm{prod}\) be as follows:
+  \begin{itemize}
+    \item Every object \(A\) is a finite sequence of natural numbers \(n_1, \dots, n_k\).
+    \item There is an isomorphism between two sequences \(A, B\) iff \(\prod_i A_i = \prod_j B_j\)
+  \end{itemize}
+\end{definition}
+
+\begin{definition}
+  We can partially describe the structure of arrays by the functor
+  \(\brm{Ary}_1 : \brm{Set} \to \brm{Set} \times \Nat\brm{prod}\) as follows
+
+  \begin{align*}
+    \brm{Ary}_1 (A) = (A, 1)
+    \brm{Ary}_1 (f) = (f, \mathrm{id})
+  \end{align*}
+\end{definition}
+
+\begin{theorem}
+  \(\brm{Ary}_1\) is free.
+\end{theorem}
+
+\chapter{Implementation}
+
+\section{Rust}
+
+\vfill
+\begin{center}\itshape End report.\end{center}
+\clearpage
+
+\appendix
+\renewcommand\thesection{\Alph{section}}
+\phantomsection
+\addcontentsline{toc}{chapter}{Appendices}
+
+\section{Appendix}
+
+\phantomsection
+\addcontentsline{toc}{chapter}{References, Lists \& Index}
+
+\vfill
+\begin{center}\itshape End appendices.\end{center}
+\clearpage
+
+\printbibliography[heading=subbibintoc]
+\listoftables
+\listoffigures
+\printindex
+\end{document}

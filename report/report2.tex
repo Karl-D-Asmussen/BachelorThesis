@@ -1,0 +1,867 @@
+\documentclass{DIKU-report-variant}
+
+\usepackage[titelside, nat, farve]{ku-forside}
+\opgave{Bachelorproject}
+\forfatter{Karl D. Asmussen}
+\titel{Multidimensional Arrays}
+\undertitel{Formally Speficied by Shape Description and Sliced with Affine Functins}
+\vejleder{Jyrki Katajainen}
+\dato{\today}
+
+\titlehead{Multidimensional Arrays: Formally Specified and Affinely Sliced} 
+\authorhead{Karl D. Asmussen}
+
+\dates{March, April 2017}
+
+\usepackage[backend=biber]{biblatex}
+%\usepackage{makeidx}
+\addbibresource{refs.bib}
+%\makeindex
+
+\usepackage{fontspec}
+\usepackage[english]{babel}
+
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[linktocpage=true]{hyperref}
+\usepackage{graphicx}
+
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usetikzlibrary{shapes,arrows,cd}
+
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{bm}
+
+\newcommand\mrm[1]{\mathrm{#1}}
+\newcommand\brm[1]{\bm{\mrm{#1}}}
+\newcommand\Nat{\mathbb{N}}
+\newcommand\Real{\mathbb{R}}
+\newcommand\Com{\mathbb{C}}
+\newcommand\Arr[1]{{\brm{Arr}_{\brm{#1}}}}
+\newcommand\SFR{\sharp\flat\varrho}
+\newcommand\SSFR{\sigma\sharp\flat\varrho}
+\newcommand\DSSFR{\div\sigma\sharp\flat\varrho}
+\newcommand\impl{\mathrel{\Rightarrow}}
+\newcommand\tlaf{\mathop{\rotatebox[origin=c]{180}{$\flat$}}}
+\newcommand\reduce{\operatorname*{\brm{reduce}}}
+\newcommand\diag{\operatorname*{\brm{diag}}}
+\newcommand\repli{\operatorname*{\brm{repli}}}
+\newcommand\oprodby[1]{\mathop{\coprod_{#1}}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  % overview
+  We attempt to formalize multidimensional arrays in a category theoretical
+  setting and provide an example library implementation in Rust.
+  % specific problem
+  Many libraries exist to provide support for multidimensional data sets, but all
+  of them are based on ad-hoc premises.
+  % review of existing solutions
+  Library implementations seen in NumPy, Matlab, Mathematica, and R are all
+  perfectly serviceable, but all function on different semantics.
+  % outline of solution
+  By formalizing operations on multidimensional arrays, we can
+  describe the differing semantics of other libraries.
+  % evaluation parameters
+  In the end, we stress test knowledge and implementation, by applying it to
+  a bachelor-level statistics problem and implementing a linear algebra algorithm.
+\end{abstract}
+
+\begin{keywords}
+  Data structure, \(d\)-dimensional array, semantics, numerical computing, Rust, NumPy
+\end{keywords}
+
+% TODO EDITING:
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\chapter{Formalization}
+
+\section{Motivation}
+
+Arrays of arrays are ubiquitous data structures, finding use
+in computer vision, computer graphics, and numerical computation.
+They model matrices in linear algebra, image data, and multidimensional data sets in statistical analysis.
+
+They are found in various more-or-less user-friendly library implementations;
+the least of which is the bare bones \texttt{double my\_C\_array[\textit{N}][\textit{M}]} of
+C, or the \texttt{real*8, dimension (0:\textit{N}-1, 0:\textit{M}-1) :: my\_F\_array} of
+Fortran\footnote{Fortran uses \(1\le i\le N\) indexing by default, whereas C uses \(0\le i<N\).
+By using the `extent' syntax in Fortran the range of array index can be changed. I have elected
+to base my arrays on zero-indexing for the reasons stated in \cite{EWD831}}.
+
+More pleasant libraries are found in computer algebra systems: SciPy, Matlab,
+R, Mathematica, and the like. These libraries all provide excellent abstractions 
+to eliminate the need for writing nested loops by hand, and provide large libraries of useful functions.
+
+There are also the array programming languages, such as APL, J and K, which provide
+much the same functionality, but in far fewer keystrokes.
+
+The first and most obvious problems are that these libraries and languages are not interoperable
+at the library level: apart from NumPy taking direct inspiration from Matlab, they
+all have different ways to work with the data stored in arrays --- different semantics.
+
+Even C and Fortran do not agree: the address of \texttt{my\_C\_array[0][0]} is `next
+to' \texttt{my\_C\_array[0][1]}, while the same is true of \texttt{my\_F\_array (0, 0)}
+and \texttt{my\_F\_array (1, 0)}.
+
+This anarchy of convention is indicative of the way each of these libraries and
+languages came about: ad hoc. Each has been concerned with practical applications
+at every step of their design, perhaps largely disregarding any underlying theory.
+
+In the absence of theory, many designs have arisen, seemingly with little common
+ground. It is reasonable to think there is a unifying theory behind these many associated
+models, and that is what we will explore in this chapter.
+
+\section{A Working Definition of Arrays}
+
+\begin{definition}
+  \label{def:finset}
+  A bounded subset of the naturals is
+  the set of natural numbers less than a given number.
+
+  We denote such sets \(\Nat_{<k}\), where \(k\) is the number
+  all elements are less than. In set-builder notation it is the set \(\{ x \in \Nat \mid x < k \}\).
+  
+  The set of natural numbers less than 1, \(\Nat_{<1}\) is the singleton set \(\{0\}\).
+
+  The set of natural numbers less than 0, \(\Nat_{<0}\) is the empty set.
+\end{definition}
+
+\begin{definition}
+  \label{def:finseq}
+  A finite sequence \(s\) drawn from a set \(S\) is a function mapping the natural
+  numbers less than the length of the sequence, to elements of that set,
+  in morphism notation written \(s : \Nat_{<k} \to S\),
+\end{definition}
+
+\begin{definition}
+  \label{def:cuboid}
+  An \(d\)-dimensional finite natural cuboid is the set of all natural-numbered points
+  within an cuboid in \(d\)-dimensional space, which has one corner at the origin.
+
+  In other words it is the Cartesian product of \(d\) sets of natural numbers
+  less than various constants; in Cartesian product notation
+  \(\Nat_{<k_0} \times \Nat_{<k_1} \times \cdots \times \Nat_{<k_{d-1}}\).
+
+  The set of natural numbers less than \(k\) is itself a 1-dimensional finite natural cuboid.
+
+  The 0-dimensional natural cuboid is the singleton set \(\{()\}\).
+
+  A natural cuboid wherein all the upper bounds for each axis is 1, that
+  is to say \(\Nat_{<1} \times \Nat_{<1} \times \cdots \times \Nat_{<1}\), is
+  also a singleton set \(\{(0, 0, \dots, 0)\}\).
+
+  A natural cuboid where one axis has upper bound 0, that is to
+  say, one of the axes is an empty set; is itself an empty set. This is very rarely relevant.
+  
+  The cardinality of a finite natural cuboid is equal to the product of
+  the cardinalities of the constituent finite sequences
+  \begin{align*}
+  |\Nat_{<k_0} \times \cdots \times \Nat_{<k_{d-1}}| = \prod_{i=0}^{d-1} k_i
+  \end{align*}
+
+  The constituent finite sequences \(\Nat_{<k_i}\) are called its axes.
+\end{definition}
+
+\begin{definition}
+  \label{def:array}
+  An \(d\)-rank array \(A\) over a set \(S\) generalizes a finite sequence and
+  is a function from an \(d\)-dimensional cuboid
+  \(\Nat_{<k_1} \times \Nat_{<k_2} \times \cdots \times \Nat_{<k_d}\) to elements of the set.
+
+  In morphism notation, \(A : \Nat_{<k_1} \times \Nat_{<k_2} \times \cdots \times \Nat_{<k_d} \to S\).
+
+  All finite sequences are rank-1 arrays. An array where the domain is a singleton
+  set as per definition \ref{def:cuboid} above, is effectively a scalar, and we shall
+  not make any special notational effort to distinguish singleton arrays from actual scalars.
+\end{definition}
+
+\begin{definition}
+  \label{def:shape}
+  Given an \(d\)-dimensional array \(A\) over a cuboid
+  \(\Nat_{<k_1} \times \Nat_{<k_2} \times \cdots \times \Nat_{<k_d}\),
+  the finite sequence of the upper limits of each dimension of the cuboid
+  \(k_1, k_2, \dots, k_d\) is called the \emph{shape} of the array, denoted
+  \(\sharp A\), in morphism notation \(\sharp A : \Nat_{<d} \to \Nat\).
+  
+  The shape of the shape is the rank, \(\sharp \sharp A = d\).
+
+  The shape of the shape of the shape is always 1, meaning \(\sharp \sharp \sharp A = 1\).
+  The shape of a scalar is also 1, i.e. for some scalar \(x\) we have \(\sharp x = 1\).
+\end{definition}
+
+\begin{remark}
+  \label{rem:syntax}
+  For the remainder of this report, we shall adopt a familiar syntax for arrays
+  \begin{align*}
+    A = [ x_1\; x_2\; \cdots \; x_k ] \quad \text{and} \quad
+    B = \begin{bmatrix}
+      y_{1,1} & \cdots & y_{1,n} \\
+      \vdots & \ddots & \vdots \\
+      y_{m,1} & \dots  & y_{m,n} 
+    \end{bmatrix}
+  \end{align*}
+  where
+  \begin{align*}
+    \sharp A = [k] \quad \text{and} \quad \sharp B = [ m\; n ] && .
+  \end{align*}
+  Indexing of arrays will be denoted with function-call notation, as in Fortran
+  \begin{align*}
+    A(n) = x_n \quad \text{and} \quad B(m,n) = y_{m,n} && .
+  \end{align*}
+  We will also use familiar terminology from spatial geometry, and linear/tensor algebra (rank,
+  inner/outer product, dimensions, etc. More on that later.)
+\end{remark}
+
+\begin{remark}
+  \label{rem:deep-nesting}
+  For deeper nested arrays than two dimensions, we nest the usual matrix notation,
+  with different brackets for clarity:
+  \begin{align*}
+    \begin{bmatrix}
+      (a_{111}\; \cdots\; a_{11p}) & \cdots & (a_{1m1}\; \cdots\; a_{1mp}) \\
+      \vdots & \ddots & \vdots \\
+      (a_{n11}\; \dots\; a_{n1p}) & \cdots & (a_{nm1}\; \dots\; a_{nmp})
+    \end{bmatrix}
+  \end{align*}
+  \begin{align*}
+    \begin{bmatrix}
+      \begin{pmatrix}
+        a_{1111} & \cdots & a_{111q} \\
+        \vdots & \ddots & \vdots \\
+        a_{11p1} & \cdots & a_{11pq} 
+      \end{pmatrix} & \cdots &
+      \begin{pmatrix}
+        a_{1m11} & \cdots & a_{1m1q} \\
+        \vdots & \ddots & \vdots \\
+        a_{1mp1} & \cdots & a_{1mpq} 
+      \end{pmatrix} \\
+      \vdots & \ddots & \vdots \\
+      \begin{pmatrix}
+        a_{n111} & \cdots & a_{n11q} \\
+        \vdots & \ddots & \vdots \\
+        a_{n1p1} & \cdots & a_{n1pq} 
+      \end{pmatrix} & \cdots &
+      \begin{pmatrix}
+        a_{nm11} & \cdots & a_{nm1q} \\
+        \vdots & \ddots & \vdots \\
+        a_{nmp1} & \cdots & a_{nmpq} 
+      \end{pmatrix}
+    \end{bmatrix} \\
+  \end{align*}
+  And so on. This will rarely be relevant.
+\end{remark}
+
+\begin{definition}
+  \label{def:flat}
+  The flat traversal of an array \(A\) is a finite sequence obtained by
+  traversing the domain of \(A\) in lexicographical order.
+  
+  The standard lexicographical order of finite cuboid
+  \(\Nat_{<x_1} \times \cdots \times \Nat_{<x_d}\) counts upwards by the
+  last index; that is to say in the order \((\dots,0), (\dots,1),\) \((\dots,2), \dots\)
+
+  Of note is also the reverse lexicographical order counts upwards by the first
+  index, \((0,\dots), (1,\dots), (2,\dots), \dots\).
+
+  The flat traversal of the array is then the composition of the finite
+  sequence of points in the cuboid given by a lexicographical order,
+  with the array \(A\), yielding a finite sequence --- a rank-1 array.
+
+  We denote the standard lexicographical traversal by \(\flat A\),
+  and the reverse by \(\tlaf A\).
+
+  The traversal of a rank-1 array is itself, \(\sharp \sharp A = 1 \impl \flat A = A\).
+
+  The shape of a traversal of an array is the product over the shape
+  of the array \(\sharp \flat A = \prod \sharp A\).
+\end{definition}
+
+\begin{observation}
+  \label{ob:cardinality}
+  The cardinality of a function, when given as a set of pairs, is equal to
+  the cardinality of its domain. Interpreting an array \(A\) as a function, and
+  taking its cardinality \(|A|\) is to take the cardinality of the cuboid it is
+  defined over, which is the product of the cardinalities of constituent axes as
+  per definition \ref{def:cuboid}.
+
+  Hence we have that \(|A| = \sharp \flat A = \prod \sharp A\).
+  We shall however prefer the notation \(\sharp \flat A\), as it
+\end{observation}
+
+\begin{example}
+  \label{ex:flat}
+  The flat traversal of the array
+  \begin{align*}
+    A =
+    \begin{bmatrix}
+      1 & 2 & 3 \\
+      4 & 5 & 6 \\
+      7 & 8 & 9
+    \end{bmatrix} \quad \sharp A = [3\; 3]
+  \end{align*}
+  is \([1\; 2\; 3\; 4\; 5\; 6\; 7\; 8\; 9]\).
+  The reverse traversal is \([1\; 4\; 7\; 2\; 5\; 8\; 3\; 6\; 9]\).
+\end{example}
+
+\begin{observation}
+  \label{ob:c-fortran-order}
+  The standard and reverse lexicographical traversals of an array to some extent
+  mimics reinterpreting an array as a sequence of contiguous cells in memory.
+
+  By definition, our arrays are mathematical objects, and therefore have no
+  implementation or embedding in computer memory, but even so, the \(\flat A\)
+  corresponds to the C-layout of \(A\) and \(\tlaf A\) is the Fortran-layout.
+
+  The reverse lexicographical traversal is not actually very useful save to illustrate
+  this point.
+\end{observation}
+
+\begin{remark}
+  We shall refer to the standard lexicographical traversal as the `flat traversal'
+  and only distinguish it from the reverse when both are used in the same
+  context.
+\end{remark}
+
+\begin{remark}
+  \label{rem:quant-elision}
+  When using operator notation \(\bigoplus_{i=m}^n f(i)\)
+  we shall elide the bounds \({}_{i=m}^n\) when the range of quantification can
+  be inferred from the domain of the function \(f\). If the function only
+  takes one argument as well, we will even elide naming the quantified variable,
+  emulating the `point-free' style of functional programming.
+
+  For an rank-1 array \(A\) with shape \(k = \sharp A\), normally we would
+  write the product over all elements in the array by specifying the lower
+  and upper bounds of the product \(\prod_{i=0}^{k} A(i)\). Instead we elide
+  that, and write \(\prod_i A(i)\) or even \(\prod A\).
+\end{remark}
+
+\begin{definition}
+  \label{def:reshape-comp} 
+  Two array shapes, \(\sharp A\) and \(\sharp B\) are reshape-compatible, iff the product
+  of their entries are equal. In other words
+  \(\prod_{i} (\sharp A)(i) = \prod_{i} (\sharp B)(i)\) (or even simpler,
+  \(\prod \sharp A = \prod \sharp B\).)
+
+  Reshape-compatibility is an equivalence relation.
+\end{definition}
+
+\begin{definition}
+  \label{def:reshape-equiv}
+  Two arrays are the reshapes of one another when they have the same traversal
+  \(\flat A = \flat B\). This of course implies reshape-compatibility.
+\end{definition}
+
+\begin{theorem}
+  Equality of the traversals
+  \(\flat A = \flat B\) does not imply the same holds true
+  for the reverse traversals \(\tlaf A = \tlaf B\).
+
+  We prove by presenting a counter-example.
+\end{theorem}
+\begin{proof}
+  Consider the arrays
+  \begin{align*}
+    A =
+    \begin{bmatrix}
+      1 & 2 & 3 \\
+      4 & 5 & 6
+    \end{bmatrix}
+    \quad\text{and}\quad
+    B =
+    \begin{bmatrix}
+      1 & 2 \\
+      3 & 4 \\
+      5 & 6
+    \end{bmatrix}
+  \end{align*}
+  Both have the flat traversal \(\flat A = \flat B = [1\; 2\; 3\; 4\; 5\; 6]\),
+  but the reverse traversals are \(\tlaf A = [1\; 4\; 2\; 5\; 3\; 6]\) and
+  \(\tlaf B = [1\; 3\; 5\; 2\; 4\; 6]\).
+\end{proof}
+
+\begin{definition}
+  \label{def:reshape}
+  Given an array \(A\) and a reshape-compatible shape \(\rho\), meaning \(\prod \sharp A = \prod\rho\),
+  there is an array \(B\) which is also reshape-compatible \(\sharp B = \rho\) and
+  has the same traversal as the first array \(\flat A = \flat B\).
+  
+  The array \(B\) is called the \(\rho\)-shaped reshape of \(A\), and we denote
+  it \(B = \varrho(A, \rho)\).
+\end{definition}
+
+\begin{theorem}
+  \label{the:unique-reshape}
+  The reshape operation \(\varrho(A, \rho)\) is a partial function.
+
+  It is partial in that it is by definition undefined when \(\prod \sharp A \ne \prod \rho\).
+
+  We prove uniqueness by contradiction.
+\end{theorem}
+\begin{proof}
+  Suppose there exists two distinct arrays \(B_1, B_2\) which are both reshapes of \(A\) with
+  the same shape \(\rho\)
+  \begin{align*}
+    B_1 &= \varrho(A, \rho) \\
+    B_2 &= \varrho(A, \rho) \\
+    B_1 &\ne B_2
+  \end{align*}
+  which therefore  have the given shape \(\sharp B_1 = \sharp B_2 = \rho\)
+  and both have the same traversals as the original array \(\flat B_1 = \flat B_2 = \flat A\),
+  and which are not equal \(B_1 \neq B_2\).
+  
+  This implies that there exists an index into the two arrays \(X = [x_1\; \dots\; x_d], \sharp X = \sharp \rho\),
+  such that \(B_1(X) \neq B_2(X)\).
+
+  By the definition of traversals there exists a number \(k\)
+  so that that \(B_1(X) = (\flat B_1)(k)\) and \(B_2(X) = (\flat B_2)(k)\).
+  
+  That index must have unequal values in both arrays' traversals \((\flat B_1)(k) \neq (\flat B_2)(k)\),
+  which is inconsistent with the statement that the entire traversals of both are equal, \(\flat B_1 = \flat B_2\). \contradict
+\end{proof}
+
+\begin{example}
+  \label{ex:reshape}
+  Reshape is a useful operation especially to create \(d\)-rank arrays
+  out of easier-to-describe arrays, such as rank-1 arrays:
+
+  \begin{align*}
+    A = [0\; 1\; 2\; 3\; 4\; 5]
+    \varrho(A, [2\;3]) = \begin{bmatrix}
+      0 & 1 & 2 \\
+      3 & 4 & 5 
+    \end{bmatrix}
+  \end{align*}
+\end{example}
+
+\begin{remark}
+  \label{def:rho-func}
+  The reshape function \(\varrho(A, \rho)\) is technically a partial function; it is
+  undefined if the shape of \(A\) is not reshape compatible with \(\rho\).
+
+  Reshaping to one axis is the same as flattening, \(\varrho(A, \sharp \flat A) = \flat A\).
+\end{remark}
+
+\section{Categorical Setting}
+
+The problem of constructing a categorical setting for any theory
+is that a bottoms-up approach is often the last thing we want to do.
+
+A bottoms-up approach to formalizing something in category theory is to
+start with a set-theoretical description of your objects
+and then work with a subset of the functions between the underlying sets as
+the arrows of your category.
+
+This approach is used in e.g. group theory, ring theory, etc.
+
+Unfortunately, our description of arrays is both not obviously workable from a
+set-theoretical perspective, the set of arrays over a set is not characterized by
+external propositions.\footnote{Arrays over a set has is more in common with a slice category.}
+
+So, in the absence of a bottoms-up approach, starting in set-theory and building category theory,
+we do the opposite: start in category theory, and approach the desired properties of our arrays.
+\footnote{This technique is often seen in group theory, where some groups are easily described as
+free groups of some order, with additional equalities to obtain the desired structure.}
+
+\begin{definition}
+  \label{def:category-of-shapes}
+  We define the quiver \(Q\), to have the vertex set \(V\), the edge label set \(L\),
+  and the edge set \(E \subset V\times V\times L\).
+
+  The vertices are finite sequences (rank-1 arrays)
+  of natural numbers, \(v \in V \implies v : \Nat_{<k} \to \Nat\).
+  
+  The edges are as follows:
+  \begin{itemize}
+    \item For every finite sequence \(v : \Nat_{<k} \to \Nat\),
+      there is an edge from it, to the single-element sequence
+      that is the product of its elements \(e = (v, 0 \mapsto \prod v)_\flat \in E\).
+      \footnote{Here \(\mapsto\) denotes unnamed functions.}
+    \item For every finite sequence \(v : \Nat_k \to \Nat\),
+      there is an edge from it, to the single-element sequence
+      that is the number of its elements \((v, 0 \mapsto k)_\sharp \in E\).
+  \end{itemize}
+  These two schema correspond to the operations \(\flat\) and \(\sharp\), respectively.
+
+  \begin{itemize}
+    \item For every pair of finite sequences \(v, w\), an edge
+      connects them iff they have the same product, \(\prod v = \prod w \impl (v, w)_\varrho \in E\),
+  \end{itemize}
+  This corresponds to the \(\varrho\) partial function. 
+
+  The label set is the names of the operations in question, \(L = \{\sharp,\flat,\varrho\}\)
+
+  Define the category \(\Arr\SFR\) to be the free category over \(Q\)
+  except with the additional commutation
+  property that \(\flat\) and \(\varrho\) are equivalent, in that the following diagram commutes:
+    \footnote{Recall that a commuting diagram is a statement of equivalences. Every composition
+    of arrows in a commuting diagram with the same start and end (domain and codomain) are equal.}
+  \begin{center}
+  \begin{tikzcd}
+    A \ar [yshift=0.7ex, r, "\varrho"]
+      \ar [yshift=-0.7ex, r, swap, "\flat"]
+    & B
+  \end{tikzcd}
+  \end{center}
+  and also that every \(\varrho\) arrow is an isomorphism, so the following commutes:
+  \begin{center}
+  \begin{tikzcd}
+    A \ar [yshift=0.7ex, r, "\varrho"]
+    & B \ar [yshift=-0.7ex, l, "\varrho"]
+  \end{tikzcd}.
+  \end{center}
+
+  Define the category \(\Arr\varrho\) as the proper subcategory of \(\Arr\SFR\) without the
+  \(\sharp\) morphisms (the \(\flat\) morphisms is just another name for certain \(\varrho\) morphisms.)
+
+  We call \(\Arr\varrho\) the category of reshaping, and \(\Arr\SFR\) the category of array
+  shapes proper.
+\end{definition}
+
+We see that the category of reshaping \(\Arr\varrho\) has a peculiar structure,
+in that we have several clusters of isomorphic objects. All of these clusters are characterized by the property
+that all of the objects in a cluster, which are finite sequences, have the same product.
+
+If we take the skeleton category\footnote{Quotient under the equivalence relation that
+two objects are equivalent iff an isomorphism exists between them} of \(\Arr\varrho\), we do indeed
+the trivial category over \(\Nat\) --- each object is a natural number, and there are no morphisms
+save the identity morphism.
+
+\section{Categorical Intuitions}
+
+If we consider the category of array re-shapes \(\Arr\varrho\) and disregard the troublesome
+\(\sharp\)-arrows (so, essentially array shapes without shape, but let us call it \(\Arr0\setminus\sharp\))
+we have a category of \emph{factorizations}, isomorphic under the number factorized.
+
+Let us take a closer look at what that means: 
+
+Recall from elementary arithmetic that a factorization is a product of
+natural numbers, and that two products are equal iff the identities of
+the multiplication monoid proves that they are, or equivalently,
+if they factorize the same number. A factorization is always equal to
+the number factorized under the identities of multiplication.
+
+This interpretation, of array shapes as factorizations make sense. We have
+already singled out the \(\flat\)-arrows, which link each factorization to
+its `parent' number.
+
+It also opens up the consideration, that if array flattening, \(\flat A\) is
+a useful operation, and it is grounded in properties of natural number multiplication.
+
+Associativity of multiplication is taken as a given in that we define our
+products as sequences of natural numbers, rather than binary trees with natural-numbered
+leaves.
+
+Commutativity of multiplication states that the order of operands is irrelevant,
+and we can take a spin on it in this setting in the following manner:
+
+\begin{definition}
+  \label{def:category-of-transposes}
+  Let \(\Arr{\SSFR}\) be a proper supercategory to \(\Arr\SFR\).
+  It has an extra schema of arrows, as follows:
+
+  If two objects \(A, B\) have their finite sequences be
+  a permutation of one another, with the permutation given by \(\sigma\),
+  there is an ismophic arrow connecting them
+  \begin{center}
+    \begin{tikzcd}
+      A \ar [r, yshift=0.7ex, "\sigma"] & B \ar [l, yshift=-0.7ex, "\sigma^{-1}"]
+    \end{tikzcd}
+  \end{center}
+  
+  In the case that the permutation is the identity permutation, then the
+  resulting \(\sigma\)-arrow is the identity arrow.
+
+  \begin{center}
+    \begin{tikzcd}
+      A \ar [r, yshift=0.7ex, "\brm{id}"] \ar [r, swap, yshift=-0.7ex, "\sigma_0"] & A
+    \end{tikzcd}
+  \end{center}
+
+  We shall call \(\Arr{\SSFR}\) the category of array shapes with transpositions.
+\end{definition}
+
+In describing multiplication as finite sequences because of association,
+commutativity becomes permutation.
+
+Recall now that we are not working merely with products, but with array
+shapes. One has to ask what exchanging the order of the dimensions means in
+an array setting, and the answer presents itself in elementary linear algebra.
+
+A matrix \(\brm M\) is a rank-2 array, with the shape \(\sharp \brm M = [m\;n]\).
+It's transpose has rows and columns exchanged, meaning \(\sharp( \brm M^\intercal) = [n\;m]\)
+--- the shape is permuted.
+
+Permutation of the shape of an array is a generalization of the transpose of matrices.
+\footnote{The conjugate transpose is also a generalization of the transpose, but it
+is conceptually orthogonal to this.}
+This is \emph{very} suggestive that this is a constructive avenue of modeling.
+
+Next we look at division. Division over the natural numbers is
+a partial function. \(\frac a b\) is only well defined if \(b|a\).
+
+We shall model a subset of this definition as follows:
+
+\begin{definition}
+  \label{def:category-of-reductions}
+  Let \(\Arr\DSSFR\) be a proper supercategory of \(\Arr\SSFR\).
+  It has an extra schema of arrows as follows:
+  
+  For two objects \(A, A'\) where \(A'\) is the product obtained by deleting
+  one element from \(A\), meaning \(A = a_1 \times\cdots\times a_n\) and
+  \(A' = a_1 \times\cdots\times a_{k-1} \times a_{k+1}\times\cdots\times a_{n-1}\),
+  then there is an arrow from \(A\) to \(A'\), denoting the elimination of one
+  of the factors in \(A\) by way of division.
+
+  \begin{center}
+    \begin{tikzcd}
+      A \ar [r, "\div_k"] & A'
+    \end{tikzcd}
+  \end{center}
+
+  Notice that for a product with consecutive repeated
+  factors \(a_1 \times \cdot \times a_k \times a_{k+1} \times \cdot \times a_n,\; a_k = a_{k+1}\)
+  there are two distinct division arrows for removing \(a_k\) and \(a_{k+1}\), even
+  though both operations achieve the same final result.
+
+  These arrows signify `immediately obvious' division.
+  We shall call \(\Arr\DSSFR\) the category of array shape reductions.
+\end{definition}
+
+\section{Array Operations}
+
+\begin{remark}
+  \label{rem:functions}
+  Many useful operations can be derived from the function-nature of arrays. We touched
+  on this in definition \ref{def:flat}, where we precomposed an array with a map
+  from natural numbers to the domain of the array.
+
+  In the following definitions we will touch upon less radical functions
+  to compose with, and their meanings in terms of common operations.
+\end{remark}
+
+\begin{definition}
+  \label{def:transpose}
+  The transpose of an \(d\)-rank array \(A\) is the precomposition
+  of the function corresponding to the array, with an \(d\)th degree permutation \(\sigma\).
+  We denote the transpose with function composition \(A \circ \sigma\).
+\end{definition}
+
+\begin{example}
+  \label{ex:transpose}
+  The transpose known from linear algebra takes a rank-2 array, and
+  applies the permutation \(\sigma = \left(\begin{smallmatrix} 1 & 2 \\ 2 & 1 \end{smallmatrix}\right)\).
+\end{example}
+
+\begin{definition}
+  \label{def:map}
+  The map of array \(A\) over a set \(S\) with a function \(f\) of the same domain,
+  is an array of identical shape where each element is the function \(f\) applied to
+  the corresponding element in the original array.
+
+  This can be accomplished simply by postcomposing the function of \(A\)
+  with \(f\), and we shall use no unusual notation, denoting it \(f \circ A\).
+\end{definition}
+
+\begin{example}
+  \label{ex:scaling}
+  The scaling operation in linear algebra, is to multiply every component in
+  a vector by the same element of the underlying field.
+
+  This can be modeled by the map operation. Thus in linear algebra \(k\brm v\)
+  corresponds to \((x \mapsto kx) \circ \brm v\) in arrays. Here \(x \mapsto kx\) is
+  the unnamed function that takes every number \(x\) to the product of \(k\) and \(x\).
+\end{example}
+
+\begin{definition}
+  \label{def:reduce}
+  The reduction of an \(d\)-rank array \(A\) over a set \(S\), on
+  an axis \(k\) requires the specification of a monoid
+  \((S, \oplus, \epsilon)\), and produces a \((d-1)\)-rank array \(B\), without
+  axis number \(k\).
+
+  It does so, by having each element in the reduced array \(B\), be the monoidal sum
+  of the elements in axis \(d\) but otherwise at the same position in the original array \(A\).
+
+  It follows the function definition:
+  \begin{align*}
+    B(x_0,\dots,x_{k-1},x_{k+1},\dots,x_{d-2}) = \bigoplus_{x_k} A(x_0,\dots,x_{k-1},x_k,x_{k+1},\dots,x_{d-1})
+  \end{align*}
+
+  We denote it by \( B = \reduce_{(S, \oplus, \epsilon),d} A \)
+
+  In a rank-1 array, the reduction is just the ordinary quantified monoid sum.
+
+  If the array has null domain (see definition \ref{def:cuboid}) the result is
+  the monoid identity.
+\end{definition}
+
+\begin{example}
+  \label{ex:reduce}
+  The sum of the elements of each row-vector of a vector can be found by using the monoid \((\Real, +, 0)\)
+  and working on the second axis (1) of a matrix
+  \begin{align*}
+    \reduce_{(\Real, +, 0), 1} \begin{bmatrix}
+      a & b & c \\
+      d & e & f
+    \end{bmatrix} = [(a + b + c)\;\;(d + e + f)]
+  \end{align*}
+  If we wish to sum the elements of each column-vector, we use the first axis (0)
+  \begin{align*}
+    \reduce_{(\Real, +, 0), 0} \begin{bmatrix}
+      a & b & c \\
+      d & e & f
+    \end{bmatrix} = [(a + d)\;(b + e)\;(c + f)]
+  \end{align*}
+\end{example}
+
+\begin{remark}
+  \label{rem:reduce}
+  It is possible to use a simpler structure than a monoid to perform
+  the reduce operation, for instance a Semigroup or a Magma. Using a semigroup
+  makes the operation undefined for null arrays, unless we specify the neutral element
+  on a case-by-case basis; using a Magma we lose the ability to do divide-and-conquer
+  parallel processing and we introduces the left-fold/right-fold distinction.
+\end{remark}
+
+\begin{definition}
+  \label{def:diagonal}
+  Given an array \(A\) with two equal-sized axes \((\sharp A)(k_1) = (\sharp A)(k_2)\),
+  the diagonal \(B\) elides the second axis, duplicates the coordinate given in the first
+  axis to the second.
+
+  Iterating over the remaining axis \(k_1\) in the diagonal array \(B\), will traverse the two relevant
+  axes \(k_1,k_2\) in \(A\) in lockstep.
+
+  It is given by the function definition
+  \begin{align*}
+    B(x_0, \dots, x_{k_1}, \dots, x_{k_2 - 1}, x_{k_2 + 1}, \dots, x_{d-1}) = \\
+    A(x_0, \dots, x_{k_1}, \dots, x_{k_2 - 1}, x_{k_1}, x_{k_2 + 1}, \dots, x_{d-1})
+  \end{align*}
+
+  We denote it by \(B = \diag_{k_1,k_2} A\).
+
+  If more than two axes are equal, this definition of binary diagonal can easily be extended to
+  \(d\)-ary diagonal by repeated application of the operator.
+\end{definition}
+
+\begin{example}
+  \label{ex:trace}
+  The trace of a matrix is the sum of the diagonal. We can describe it with the diagonal
+  and reduce operators
+  \begin{align*}
+    \operatorname*{\brm{tr}} M = \reduce_{(\Real,+,0),0} \diag_{0,1} M
+  \end{align*}
+\end{example}
+
+\begin{definition}
+  \label{def:replication}
+  The replication of an \(d\)-rank array \(A\) adds a new axis \(d\) with maximum \(k\)
+  which is ignored in the indexing operation, producing an \((d+1)\)-rank array \(B\).
+
+  It is given by the function definition
+  \begin{align*}
+    B(x_0, \dots, x_{d-1}, x_d, x_{d+1}, \dots, x_{d}) = A(x_0, \dots, x_{d-1}, x_{d+1}, \dots, x_d)
+  \end{align*}
+
+  We denote it by \(B = \repli_{\times d, k} A\)
+\end{definition}
+
+\begin{definition}
+  \label{def:outer-product}
+  The outer product combines two arrays \(A\) and \(B\) over
+  two potentially different sets \(S\) and \(R\), combines
+  them combinatorially with a function \(f\) that takes two
+  arguments from \(S\) and \(R\).
+
+  The resulting array \(C\) has a shape which is the concatenation
+  of the shapes of \(A\) and \(B\). It is given by the function definition
+  \begin{align*}
+    C(x_0,\dots,x_{d-1},x_d,\dots,x_{g-1}) = f(A(x_0,\dots,x_{d-1}), B(x_d,\dots,x_{g-1}))
+  \end{align*}
+
+  We denote the outer product of two arrays \(A\) and \(B\) by way of the combining
+  function \(f\), with the notation \(A \oprodby f B\).
+\end{definition}
+
+\begin{example}
+  \label{ex:matrix-product}
+  The matrix product can be derived with the outer product,
+  the diagonal, and reduction.
+
+  The matrix product takes two arrays of such a shape that the
+  second axis of the first is equal to the first axis of the second
+  \(\sharp A = [k\; m], \sharp B = [m\; n]\). It then discards those
+  two axes, and produces and array of shape \(\sharp X = [k\; n]\).
+
+  The matrix product also includes the operations multiplication and
+  summation, taken from the inner product. The inner product gives us
+  the clue that multiplication is the combining operation.
+
+  Consider the outer product \(A \oprodby\times B\). It has the
+  shape \([k\;m\;m\;n]\). This not only contains the undesired middle axis,
+  but does so in duplicate.
+
+  We also know from the inner product that summation is involved, a reduction
+  by the addition monoid. We cannot reduce on two axes at once, so we eliminate
+  the duplication bu taking the diagonal
+  \begin{align*}
+    \sharp \diag_{1,2} A \oprodby\times B = [k\;m\;n]
+  \end{align*}
+
+  Finally, reducing the middle axis away gives us the desired shape
+  \begin{align*}
+  \sharp \reduce_{+,1} \diag_{1,2} A \oprodby\times B = [k\;n]
+  \end{align*}
+
+  Writing out the function definition, we see that it is indeed the matrix product
+  \begin{align*}
+    \left(\reduce_{+,1} \diag_{1,2} A \oprodby\times B\right) (i, k)
+    &= \sum_{j} \left(\diag_{1,2} A \oprodby\times B\right) (i, j, k) \\
+    &= \sum_{j} \left(A \oprodby\times B\right) (i, j, j, k) \\
+    &= \sum_{j} A(i, j) \times B(j, k) \\
+  \end{align*}
+  showing our array formalism is strong enough to decompose operations
+  otherwise thought of as fundamental.
+\end{example}
+
+\chapter{Implementation}
+
+\section{Rust}
+
+\vfill
+\begin{center}\itshape End report.\end{center}
+\clearpage
+
+\appendix
+\renewcommand\thesection{\Alph{section}}
+\phantomsection
+\addcontentsline{toc}{chapter}{Appendices}
+
+\section{Placeholder}
+
+\vfill
+\begin{center}\itshape End appendices.\end{center}
+\clearpage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{References}
+\printbibliography
+%\listoftables
+%\listoffigures
+%\printindex
+
+\vfill
+\begin{center}\itshape End document.\end{center}
+
+\end{document}

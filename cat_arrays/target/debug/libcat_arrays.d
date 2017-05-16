@@ -1,0 +1,1 @@
+/home/karl/Documents/Bachelor/cat_arrays/target/debug/libcat_arrays.rlib: /home/karl/Documents/Bachelor/cat_arrays/src/traits.rs /home/karl/Documents/Bachelor/cat_arrays/src/lib.rs /home/karl/Documents/Bachelor/cat_arrays/src/utils.rs

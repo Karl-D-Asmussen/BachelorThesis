@@ -1,0 +1,6 @@
+[package]
+name = "cat_arrays"
+version = "0.1.0"
+authors = ["Karl-D-Asmussen <karl.d.asmussen@gmail.com>"]
+
+[dependencies]

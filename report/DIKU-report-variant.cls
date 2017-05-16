@@ -228,6 +228,7 @@
                    \gdef\@contributors{}%
 }
 
+\gdef\fnnstart{0}
 \global\def\institutename{\par%
   \begingroup%
   \parskip=\z@%
@@ -280,7 +281,7 @@
 \pagenumbering{arabic}%
 \onecolumn%
 \@twosidetrue
-\thispagestyle{empty}
+\thispagestyle{plain}
 
 \renewcommand\cleardoublepage{%
   \clearpage%

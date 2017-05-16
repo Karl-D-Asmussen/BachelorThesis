@@ -75,14 +75,17 @@
 %
 % Pakker nødvendige for at sætte forsiden op
 %
+%
 \RequirePackage{eso-pic,graphicx,ae,aecompl,ifthen}
 \RequirePackage{color}
 % BABEL-option: Undersøger det erklærede sprog og sætter pakken Babel derefter
 \if@babel
 % Engelsk ordeling, overskrifts- og kapitel struktur
-\ifthenelse{\equal{\SPROG}{en}}{\RequirePackage[danish,english]{babel}}{} 
+\ifthenelse{\equal{\SPROG}{en}}{\RequirePackage[danish,english]{babel}%
+}{} 
 % Dansk ordeling, overskrifts- og kapitel struktur
-\ifthenelse{\equal{\SPROG}{da}}{\RequirePackage[english,danish]{babel}}{} 
+\ifthenelse{\equal{\SPROG}{da}}{\RequirePackage[english,danish]{babel}%
+}{} 
 % Bemærk at begge sprog indlæses. Rækkefølgen er vigtig, idet det er det sidste sprog som dokumentet generelt sættes i.
 % Det andet sprogs orddeling mm. kan man få fat i ved at skrive \selectlanguage{sprog} i brødteksten
 \fi
@@ -93,7 +96,8 @@
 \ifthenelse{\equal{\FORSIDE}{titelside}}{
 \def\tyk{\fontfamily{phv}\fontseries{bx}\selectfont} %Bold extended
 \def\tynd{\fontfamily{phv}\fontseries{sb}\selectfont} % Semi-bold  
-\def\maketitle{\thispagestyle{empty}
+\def\maketitle{\setcounter{page}{1}%
+\thispagestyle{firstpage}%
 \AddToShipoutPicture*{\put(0,0){\includegraphics*[viewport=0 0 700 600]{\AFDELING-\FARVE}}}%
 \AddToShipoutPicture*{\put(0,602){\includegraphics*[viewport=0 600 700 1600]{\AFDELING-\FARVE}}}%
 \AddToShipoutPicture*{\put(0,0){\includegraphics*{\AFDELING-\SPROG}}}%

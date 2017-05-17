@@ -11,5 +11,7 @@
 *.log
 texput.log
 *.pdf
+*.rlib
+*.d
 .irb_history
 cat_arrays/target/debug/deps

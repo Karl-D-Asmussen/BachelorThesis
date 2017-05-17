@@ -12,3 +12,4 @@
 texput.log
 *.pdf
 .irb_history
+*/deps/*

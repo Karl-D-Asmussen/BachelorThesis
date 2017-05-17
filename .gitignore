@@ -12,4 +12,4 @@
 texput.log
 *.pdf
 .irb_history
-*/deps/*
+cat_arrays/target/debug/deps

@@ -1,4 +1,6 @@
 
+use macros;
+
 use traits::ArrayLike;
 
 struct DummyArray<T>(::std::marker::PhantomData<T>);
@@ -31,6 +33,24 @@ impl<T> ArrayLike for DummyArray<T> {
   fn repeat(&self, _len : usize) -> Self::Repeat { unimplemented!() }
 }
 
+struct FlatIter<A, T>
+where A : ArrayLike<Entry = T> {
+  arr : A,
+  index : usize,
+}
+
+struct FlatIterMut<A, T>
+where A : ArrayLike<Entry = T> + ArrayLikeMut {
+  arr : A,
+  index : usize,
+}
+
+struct IntoFlatIter<A, T>
+where A : ArrayLike<Entry = T> + ArrayLikeMut + IntoFlat {
+  arr : <A as IntoFlat>::Flattened,
+  index : usize,
+}
+
 fn compute_index(base : usize, index : isize) -> Option<usize> {
     if index < 0 && index >= -(base as isize) {
         Some((index + (base as isize)) as usize)
@@ -57,7 +77,7 @@ struct Same<T> {
 }
 
 impl<T> Same<T> {
-    fn new(val : T, count : usize) -> { Same { val, count } }
+    fn new(val : T, count : usize) -> Self { Same { val, count } }
 }
 
 impl<T> ArrayLike for Scalar<T> {
@@ -69,11 +89,32 @@ impl<T> ArrayLike for Scalar<T> {
     type Transpose = Scalar<T>;
     type Fixate = Scalar<T>;
     type Diagonal = Scalar<T>;
-    type Repeat = DummyArray;
+    type Repeat = DummyArray<T>;
     
     fn dim(&self) -> usize { self.dims }
     fn len(&self) -> usize { 1 }
-    fn shape(&self) -> usize { Same { val : 1usize, count : self.dims } }
+    fn shape(&self) -> Self::Shape { Same { val : 1usize, count : self.dims } }
+
+    fn at<I>(&self, coordinate : I) -> Self::Entry {
+        at_coordinate_check!(coordinate, self);
+
+    }
+}
+
+impl<T> ArrayLike for Same<T> {
+    type Entry = T;
+    type Shape = Scalar<usize>;
+    type Flat = Same<T>;
+    type Reshape = Same<T>;
+    type Slice = Same<T>;
+    type Transpose = Same<T>;
+    type Fixate = Same<T>;
+    type Diagonal = Same<T>;
+    type Repeat = DummyArray<T>;
+
+    fn dim(&self) -> usize { 1 }
+    fn len(&self) -> usize { self.count }
+    fn shape(&self) -> Self::Shape { Scalar { val : self.count, dims : 1 } }
 }
 
 

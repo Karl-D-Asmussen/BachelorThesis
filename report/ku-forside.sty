@@ -1,4 +1,3 @@
-% Stilfilen ku-forside. Forsider til opgaver skrevet på Københavns Universitet
 % Skrevet af Christian Aastrup. Designet af forsiderne følger det på 
 % http://www.ku.dk/designmanual
 %
@@ -96,8 +95,9 @@
 \ifthenelse{\equal{\FORSIDE}{titelside}}{
 \def\tyk{\fontfamily{phv}\fontseries{bx}\selectfont} %Bold extended
 \def\tynd{\fontfamily{phv}\fontseries{sb}\selectfont} % Semi-bold  
-\def\maketitle{\setcounter{page}{1}%
-\thispagestyle{firstpage}%
+\def\maketitle{%
+\pagestyle{empty}%
+\thispagestyle{empty}%
 \AddToShipoutPicture*{\put(0,0){\includegraphics*[viewport=0 0 700 600]{\AFDELING-\FARVE}}}%
 \AddToShipoutPicture*{\put(0,602){\includegraphics*[viewport=0 600 700 1600]{\AFDELING-\FARVE}}}%
 \AddToShipoutPicture*{\put(0,0){\includegraphics*{\AFDELING-\SPROG}}}%
@@ -108,8 +108,10 @@
 \AddToShipoutPicture*{\put(50,92){\fontsize{11 pt}{12 pt} \tynd \VEJLEDER  }}%
 \AddToShipoutPicture*{\put(50,66.7){\fontsize{11 pt}{12 pt} \tynd \AFLEVERINGSDATO  }}%
 %
-\phantom{Usynlig, men nødvendig}
-\newpage \noindent}}{}%
+\phantom{Usynlig, men nødvendig}%
+\pagenumbering{arabic}%
+\clearpage \noindent \setcounter{page}{1}%
+}}{}%
 %
 % Mulighed: lille
 \ifthenelse{\equal{\FORSIDE}{lille}}{

@@ -1,7 +1,5 @@
 \documentclass{DIKU-report-variant}
 
-\pagestyle{firstpage}
-
 \usepackage[titelside, nat, en, farve]{ku-forside}
 \opgave{Bachelorproject}
 \forfatter{Karl D. Asmussen}
@@ -51,10 +49,10 @@
 \newcommand\XCADSSFR{\times c\cdot\approx\div\sigma\sharp\flat\varrho}
 \newcommand\impl{\mathrel{\Rightarrow}}
 \newcommand\tlaf{\mathop{\rotatebox[origin=c]{180}{$\flat$}}}
-\newcommand\reduce{\operatorname*{\brm{reduce}}}
-\newcommand\diag{\operatorname*{\brm{diag}}}
-\newcommand\repli{\operatorname*{\brm{repli}}}
-\newcommand\oprodby[1]{\mathop{\coprod_{#1}}}
+\newcommand\reduce{\operatorname*{\brm{reduce}\,}}
+\newcommand\diag{\operatorname*{\brm{diag}\,}}
+\newcommand\tile{\operatorname*{\brm{tile}\,}}
+\newcommand\oprodby[1]{\mathop{\operatorname*{\,\brm{by}}_{#1}}}
 
 % TODO EDITING:
 %   Unified 0-indexing in all formulas
@@ -63,24 +61,21 @@
 %   Footnotes before full stops
 %   Telegram paragraphs!!
 
-% FUCK THE PAGE NUMBER ON FRONT PAGE
 \begin{document}
 \maketitle
 
-\pagenumbering{arabic}
-\thispagestyle{plain}
 \begin{abstract}
   % overview
-  We attempt to formalize multidimensional arrays in a category theoretical
-  setting and provide an example library implementation in Rust.
+  We attempt to formalize a minimal definition of multidimensional arrays
+  in a category theoretical setting and provide an example library implementation in Rust.
   % specific problem
   Many libraries exist to provide support for multidimensional data sets, but all
   of them are based on ad-hoc premises.
   % review of existing solutions
   Library implementations seen in NumPy, Matlab, Mathematica, and R are all
-  perfectly serviceable, but all function on different semantics.
+  perfectly serviceable, but all function on noninteroperable semantics.
   % outline of solution
-  By formalizing operations on multidimensional arrays, we can
+  By formalizing a minimal set of operations on multidimensional arrays, we can
   describe the differing semantics of other libraries.
   % evaluation parameters
   In the end, we stress test knowledge and implementation, by applying it to
@@ -91,8 +86,15 @@
   Data structure, \(d\)-dimensional array, semantics, numerical computing, Rust, NumPy
 \end{keywords}
 
+\vfill
+
+\paragraph{A disclaimer:} Writing this bachelor's thesis has taken nearly a year from
+initial conception to final product; sections have been written out of order, and terminology
+may be \textsl{slightly} inconsistent. There simply isn't time enough to correct this.
+
 \setcounter{tocdepth}{2}
 \tableofcontents
+
 
 \chapter{Formalization}
 
@@ -297,10 +299,10 @@ models, and that is what we will explore in this chapter.
     \sharp [1\; 2\; 3\; 4\; 5\; 6] &= [6] \\
     \sharp \begin{bmatrix}
       1 & 2 & 3 \\ 4 & 5 & 6
-    \end{bmatrix} &= [2 3] \\
+    \end{bmatrix} &= [2\; 3] \\
     \sharp \begin{bmatrix}
       1 & 2 \\ 3 & 4 \\ 5 & 6
-    \end{bmatrix} &= [3 2] \\
+    \end{bmatrix} &= [3\; 2] \\
   \end{align*}
 \end{example}
 
@@ -804,7 +806,7 @@ multiplication, the first being multiplication by a constant.
   This arrow is \emph{not} the inverse of the corresponding and opposite \(\div_k\) arrow.
 
   We shall call this the category of array shapes with transposes, reductions,
-  diagonals, and replications.
+  diagonals, and tilings.
 \end{definition}
 
 We may now ponder how to interpret this. A good strategy is often to consider the simplest
@@ -814,13 +816,14 @@ many unit-domain arrays, since for every \(d\) the cuboid \(\Nat_{<1}^d\) is a u
 \(d=0\).}
 
 To be free of constraints, we shall not consider what the domain set is. This leaves us with
-only one possible interpretation: replication. Replication can be achieved by ignoring the
+only one possible interpretation: array tiling --- the replication of an array into additional
+`layers'. Array tiling can be achieved by ignoring the
 value of the newly created index, and just reporting the value of the old array using all
-the other indexes.
+the other indexes, giving the `illusion' that there are multiple copies.
 
 This poses an interesting composition left-inverse to
-diagonal --- if we replicate a number of times equal to a pre-existing factor,
-the diagonal operation is a right-inverse to this replication, and the following
+diagonal --- if we tile a number of times equal to a pre-existing factor,
+the diagonal operation is a right-inverse to this tiling, and the following
 diagram commutes:
 
 \begin{center}
@@ -849,7 +852,7 @@ consistently make actual products that have the universal property.
   \end{center}
 
   We shall call this the category of array shapes with transposes, reductions,
-  diagonals, replications, and outer products.
+  diagonals, array tilings, and outer products.
 \end{definition}
 
 The interpretaiton of \(\pi\) arrows is trickier, since they already bear a resemblance
@@ -1093,8 +1096,8 @@ arrays in a top-down manner.
 \end{example}
 
 \begin{definition}
-  \label{def:replication}
-  The replication of an rank-\(d\) array \(A\) adds a new axis \(d\) with maximum \(k\)
+  \label{def:tiling}
+  The tiling of an rank-\(d\) array \(A\) adds a new axis \(d\) with maximum \(k\)
   which is ignored in the indexing operation, producing an rank-\((d+1)\) array \(B\).
 
   It is given by the function definition
@@ -1102,7 +1105,7 @@ arrays in a top-down manner.
     B(x_0, \dots, x_{d-1}, x_d, x_{d+1}, \dots, x_{d}) = A(x_0, \dots, x_{d-1}, x_{d+1}, \dots, x_d)
   \end{align*}
 
-  We denote it by \(B = \repli_{\times d, k} A\)
+  We denote it by \(B = \tile_{\times d, k} A\)
 \end{definition}
 
 \begin{definition}
@@ -1300,11 +1303,80 @@ conversion? What if the flat radix function is instead affine?
 For every array operation that does not change the entries of the array (map, reduce, outer product)
 
 Given the array shape, \(\sharp A = [a\; b\; c]\) we know that \(A\) has the flat radix given
-by the covector\footnote{Every covector gives rise to a linear functional by the scalar product.} \([ab\; a\; 1]\).
+by the covector\footnote{Every covector gives rise to a linear functional by the scalar product.} \([bc\; c\; 1]\).
 If we transpose \(A\) by swapping the two last dimensions
 \[A' = A \circ \left(\begin{smallmatrix}1&2&3\\1&3&2\end{smallmatrix}\right),\quad \sharp A' = [a\; c\; b]\]
-it turns
+it turns out that we can specify \(A'\) in terms of \(\flat A\) like so:
+\[A' = (\brm x \mapsto [bc\; 1\; c]\cdot\brm x) \circ \flat A\quad.\]
+Any time we apply a transpose to an array, we can represent it as that same transpose only applied
+to the linear map from the coordinate cuboid of the array to the flat representation; leaving the flat
+representaiton intact.
 
+This property extends in a number of interesting ways to both repetition and diagonals:
+given an array \(A\) with shape \(\sharp A = [a\; b\; b]\) it has the flat radix \([b^2\;b\; 1]\).
+Applying the diagonal operation on the like axes \(A' = \diag_{1,2} A\) yields an array of the shape
+\(\sharp A' = [a\; b]\) and is expressible in terms of \(\flat A\) by the covector \([(b^2 + b)\; 1]\).
+Given the same array and the tiling operation \(A' = \tile_{\times c, 3} A\) yeilds an array
+of shape \(\sharp A' = [a\; b\; b\; c]\) and is expressible in terms of \(\flat A\) by the covector
+\([b^2\; b\; 1\; 0]\).
+
+In essence, in the covector translation from cuboid coordinates to flat index, we see that
+transposes map to permutation of the components, diagnonals map to addition of components,
+and tilings map to insertion of zeros.
+
+This, astute readers might recognize as operations which are easily modelable by left-multiplying
+our mixed-radix base covectors to various matrixes
+multiplication: permuting covectors is done with permutation matrixes, adding up columns
+for the diagonal opeartion can be done by multiplying by a \(d \times (d-1)\) matrix where
+one col
+
+\section{Affine Transformations}
+
+As we have seen, there is a correspondence between operations on linear functions' covector representaitons
+and the array operations outlined; but we are still short of one kind of very common operation: the slice.
+
+Slicing an array can trivially fail to preserve the value-at-origin, meaning it does not uphold this invariant
+that all the other operations have; hence it was not included in the category theory section --- it is very practical
+but of marginal theoretical significance.
+
+It is also easily implemented, when we remember that all linear functions are affine functions too. An affine function \(f'\)
+is given by a linear function \(f\), as well as a constant \(c\). When the function value of a vector, one applies
+the linear function as normal, then adds the constant:
+\[ f'(\brm x) = f(\brm x) + c \]
+
+Let us consider the trivial example of a flat array, which decomposes into itself and the one dimensional linear
+identity function.
+\begin{align*}
+  A &= \flat A \\
+  A &= \flat A \circ \mrm{id}_{\Real^1} \\&= A \circ \mrm{id}_{\Real^1}
+\end{align*}
+In order to slice \(A\), we might exchange the linear function \(\mrm{id}_{\Real^1}\) with a function of the form
+\[ f(\brm x) = [1] \cdot \brm x + 1 \]
+which would yield an array \(A' = \flat A \circ f\) with the property that the \(n\)-th element of \(A'\) is
+equal to the \((n+1)\)-th element of \(A\) like so
+\[ A'(n) = A(n+1) \]
+which is essentially the `tail' operation known from most functional programming languages.
+
+Similarly we can also implement 'stride' by deviating from the strict requirement that the linear function
+in question be a mixed radix base conversion subjected to multiplication by permutation matrixes. For a given
+flat array \(A = \flat A\) we can take every second entry by composing with the function \(f(\brm x) = 2\brm x\).
+
+\section{Homegnous Coordinates in Earnest}
+
+The idea of using affine functions to manipuate arrays without having to re-create the underlying flat
+representation in memory, can extend to more general arrays as well. For an arbitrary array \(A\) we can
+achieve much the same resut --- the ability to represent tiling, diagnoals, transposes, and slices ---
+by precomposing it with an affine function represented by a matrix in homogenous coordinates:
+\[ A = A \circ \brm I \]
+In the case of \(A\) being flat, this reduces to the above case of an affine function.
+We can represent transposes by re-ordering the rows of the matrix, diagonals by adding them, tilings by
+inserting new zero rows, and slices by scaling rows and adding multiples the final row of the matrix (zero
+on all coordinates save the homogenous one.)
+
+This is exactly the set of matrix row operations (save perhaps the insertion of new rows --- but note that
+this preserves the span of the row vectors.)
+
+Matrices are tried and true, easy to implement, and will form the basis of the copy-less slicing of my library.
 
 \vfill
 \begin{center}\itshape End report.\end{center}

@@ -61,7 +61,7 @@
 \DeclareOption{leqno}{\input{leqno.clo}}
 \DeclareOption{fleqn}{\input{fleqn.clo}}
 \DeclareOption{openbib}{\@openbibtrue}
-\ExecuteOptions{a4paper,11pt,twoside,onecolumn,final,titlepage,openany,runningheads}
+\ExecuteOptions{a4paper,11pt,twoside,onecolumn,final,notitlepage,openany,runningheads}
 \ProcessOptions
 
 \RequirePackage{multicol} % needed for the author index
@@ -1027,32 +1027,22 @@
                     \everypar{}\fi}\fi\ignorespaces}
 
 
-%\def\twolevelnumbering#1{\@for \DIKU@countername :=#1\do{
-%	\@namedef{DIKU@\DIKU@countername}{\relax}\relax}\relax
-%}
-
-\@namedef{DIKU@dikutheorem}{\relax}\relax
+\def\twolevelnumbering#1{\@for \DIKU@countername :=#1\do{
+	\@namedef{DIKU@\DIKU@countername}{\relax}\relax}\relax
+}
 
 % \DIKUnewtheorem{BODYSTYLE}{NAME}{TEXT}
-\def\DIKUnewtheorem#1#2#3{%
-  \expandafter\@ifdefinable\csname #2\endcsname{%
-    \ifdefined\c@dikutheorem%
-    \else%
-      \@definecounter{dikutheorem}%
-      \@addtoreset{dikutheorem}{section}%
-    \fi%
-    \expandafter\xdef\csname thedikutheorem\endcsname{%
-      \expandafter\noexpand
-      \thesection
-      \@thmcountersep
-      \@thmcounter{dikutheorem}%
-    }%
-    \global\@namedef{#2}{\@thm{#1}{dikutheorem}{#3}}%
-    \global\@namedef{end#2}{\@endtheorem}%
-    \global\@namedef{#2*}{\@starthm{#1}{#3}}%
-    \global\@namedef{end#2*}{\@endstartheorem}%
-  }%
-}
+\def\DIKUnewtheorem#1#2#3{\expandafter\@ifdefinable\csname #2\endcsname
+{\@definecounter{#2}\@ifundefined{DIKU@#2}{%
+\expandafter\xdef\csname the#2\endcsname{\@thmcounter{#2}}%
+\global\@namedef{#2}{\@thm{#1}{#2}{#3}}\global\@namedef{end#2}{\@endtheorem}}{%
+\@addtoreset{#2}{section}%
+\expandafter\xdef\csname the#2\endcsname{\expandafter\noexpand
+  \thesection \@thmcountersep \@thmcounter{#2}}%
+\global\@namedef{#2}{\@thm{#1}{#2}{#3}}\global\@namedef{end#2}{\@endtheorem}}
+\global\@namedef{#2*}{\@starthm{#1}{#3}}%
+      \global\@namedef{end#2*}{\@endstartheorem}
+}}
 
 \def\@starthm#1#2{%
 	\@ifnextchar[{\@starythm{#1}{#2}}{\@starxthm{#1}{#2}}}
@@ -1088,14 +1078,14 @@
 \@addtoreset{equation}{section}\gdef\theequation{%
         \@arabic\c@section.\@arabic\c@equation}}
 
-\DIKUnewtheorem{\sl}{theorem}{\theoremname}
-\DIKUnewtheorem{\sl}{lemma}{\lemmaname}
-\DIKUnewtheorem{\sl}{corollary}{\corollaryname}
-\DIKUnewtheorem{\sl}{proposition}{\propositionname}
-\DIKUnewtheorem{\sl}{definition}{\definitionname}
-\DIKUnewtheorem{\sl}{conjecture}{\conjecturename}
-\DIKUnewtheorem{\sl}{claim}{\claimname}
-\DIKUnewtheorem{\sl}{invariant}{\invariantname}
+\DIKUnewtheorem{\it}{theorem}{\theoremname}
+\DIKUnewtheorem{\it}{lemma}{\lemmaname}
+\DIKUnewtheorem{\it}{corollary}{\corollaryname}
+\DIKUnewtheorem{\it}{proposition}{\propositionname}
+\DIKUnewtheorem{\it}{definition}{\definitionname}
+\DIKUnewtheorem{\it}{conjecture}{\conjecturename}
+\DIKUnewtheorem{\it}{claim}{\claimname}
+\DIKUnewtheorem{\it}{invariant}{\invariantname}
 \DIKUnewtheorem{\rm}{problem}{\problemname}
 \DIKUnewtheorem{\rm}{example}{\examplename}
 \DIKUnewtheorem{\rm}{fact}{\factname}
@@ -1105,7 +1095,6 @@
 \gdef\proof{\relax{\noindent\bfseries \proofname\@. }\ignorespaces}
 \gdef\endproof{\ifhmode\nobreak\qed\par\fi\medskip}
 \gdef\qed{\hspace*{\fill}\raisebox{-.2ex}{$\Box$}}
-\gdef\contradict{\def\qed{\hspace*{\fill}\raisebox{-.2ex}{\lightning}}}
 }
 
 \AtBeginDocument{\DIKU@environments

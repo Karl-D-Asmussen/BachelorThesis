@@ -1,9 +1,16 @@
 
-macro_rules! at_coordinate_check {
-    ($coordinate:ident, $self:ident) => {
-        if $coordinate.dim() != 1 || $coordinate.len() != $self.dim() {
-            panic!(":{}:{}:{}: Mismatched dimensionality of coordinate", file!(), line!(), column!())
+macro_rules! rank_check {
+    ($type:ident :: $func:ident, $self:ident, $coord:ident) => {
+        if $coord.rank() != 1 || $coord.len() != $self.rank() {
+            panic!("{}:{}:{}: mismatched dimensionality of coordinate in {}::{}",
+                   file!(), line!(), column!(), stringify!($type), stringify!($func))
         }
+    }
+}
+
+macro_rules! bounds_check {
+    ($type:ident :: $func:ident, $self:ident, $coord:ident) => {
+
     }
 }
 

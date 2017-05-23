@@ -14,4 +14,4 @@ texput.log
 *.rlib
 *.d
 .irb_history
-cat_arrays/target/debug/*
+./cat_arrays/target/debug/**

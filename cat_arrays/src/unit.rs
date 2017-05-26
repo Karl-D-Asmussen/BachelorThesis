@@ -1,29 +1,29 @@
 
 use traits::ArrayLike;
-use unit::Unit;
+use same::{Same, SameRef};
 use dummy::DummyArray;
 
 #[derive(Clone, Copy)]
-pub struct Same<T : Copy>(pub T, pub usize);
+pub struct Unit<T : Copy>(pub T);
 
-pub struct SameRef<'a, T : 'a>(pub &'a T, pub usize);
+pub struct UnitRef<'a, T : 'a>(pub &'a T);
 
-impl<T : Copy> ArrayLike for Same<T> {
+impl<T : Copy> ArrayLike for Unit<T> {
   type Entry = T;
   type Shape = Unit<usize>;
-  type Flat = Same<T>;
-  type Slice = Same<T>;
+  type Flat = Unit<T>;
+  type Reshape = Unit<T>;
+  type Slice = Unit<T>;
+  type Tile = Same<T>;
 
-  type Tile = DummyArray<T>;
-  type Reshape = DummyArray<T>;
   type Fixate = DummyArray<T>;
   type Transpose = DummyArray<T>;
   type Reverse = DummyArray<T>;
   type Diagonal = DummyArray<T>;
   
   fn rank(&self) -> usize { 1 }
-  fn len(&self) -> usize { self.1 }
-  fn shape(&self) -> Self::Shape { Unit(self.1) }
+  fn len(&self) -> usize { 1 }
+  fn shape(&self) -> Self::Shape { Unit(1) }
   fn get<I>(&self, coord : &I) -> &Self::Entry
   where I : ArrayLike<Entry = isize> { unimplemented!() }
 
@@ -39,23 +39,22 @@ impl<T : Copy> ArrayLike for Same<T> {
   fn tile(&self, len : usize) -> Self::Tile { unimplemented!() }
 }
 
-
-impl<'a, T : 'a> ArrayLike for SameRef<'a, T> {
+impl<'a, T : 'a> ArrayLike for UnitRef<'a, T> {
   type Entry = T;
   type Shape = Unit<usize>;
-  type Flat = SameRef<'a, T>;
-  type Slice = SameRef<'a, T>;
+  type Flat = UnitRef<'a, T>;
+  type Reshape = UnitRef<'a, T>;
+  type Slice = UnitRef<'a, T>;
+  type Tile = SameRef<'a, T>;
 
-  type Tile = DummyArray<T>;
-  type Reshape = DummyArray<T>;
   type Fixate = DummyArray<T>;
   type Transpose = DummyArray<T>;
   type Reverse = DummyArray<T>;
   type Diagonal = DummyArray<T>;
   
   fn rank(&self) -> usize { 1 }
-  fn len(&self) -> usize { self.1 }
-  fn shape(&self) -> Self::Shape { Unit(self.1) }
+  fn len(&self) -> usize { 1 }
+  fn shape(&self) -> Self::Shape { Unit(1) }
   fn get<I>(&self, coord : &I) -> &Self::Entry
   where I : ArrayLike<Entry = isize> { unimplemented!() }
 
@@ -70,4 +69,3 @@ impl<'a, T : 'a> ArrayLike for SameRef<'a, T> {
   fn diagonal(&self, ax1 : usize, ax2 : usize) -> Self::Diagonal { unimplemented!() }
   fn tile(&self, len : usize) -> Self::Tile { unimplemented!() }
 }
-

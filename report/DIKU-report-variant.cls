@@ -61,7 +61,7 @@
 \DeclareOption{leqno}{\input{leqno.clo}}
 \DeclareOption{fleqn}{\input{fleqn.clo}}
 \DeclareOption{openbib}{\@openbibtrue}
-\ExecuteOptions{a4paper,11pt,twoside,onecolumn,final,titlepage,openany,runningheads}
+\ExecuteOptions{a4paper,11pt,oneside,onecolumn,final,titlepage,openany,runningheads}
 \ProcessOptions
 
 \RequirePackage{multicol} % needed for the author index

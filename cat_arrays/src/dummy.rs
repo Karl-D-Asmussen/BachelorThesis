@@ -1,10 +1,8 @@
 
 use traits::{ArrayLike, ArrayLikeMut};
-use scalar::Scalar;
 use std::marker::PhantomData;
 
-/// A white-hole implementation of the ArrayLike trait
-struct DummyArray<T>(pub PhantomData<T>);
+pub struct DummyArray<T>(pub PhantomData<T>);
 
 impl<T> DummyArray<T> {
     fn new() -> Self {
@@ -28,7 +26,7 @@ impl<T> ArrayLike for DummyArray<T> {
   fn rank(&self) -> usize { unimplemented!() }
   fn len(&self) -> usize { unimplemented!() }
   fn shape(&self) -> Self::Shape { unimplemented!() }
-  fn at<I>(&self, coord : &I) -> &Self::Entry
+  fn get<I>(&self, coord : &I) -> &Self::Entry
   where I : ArrayLike<Entry = isize> { unimplemented!() }
 
   fn flat(&self) -> Self::Flat { unimplemented!() }
@@ -54,7 +52,7 @@ impl<T> ArrayLikeMut for DummyArray<T> {
   type DiagonalMut = DummyArray<T>;
   type TileMut = DummyArray<T>;
   
-  fn at_mut<I>(&mut self, coord : &I) -> &mut <Self as ArrayLike>::Entry
+  fn set<I>(&mut self, coord : &I, val : <Self as ArrayLike>::Entry) -> &mut Self
   where I : ArrayLike<Entry = isize> { unimplemented!() }
 
   fn flat_mut(&mut self) -> Self::Flat { unimplemented!() }

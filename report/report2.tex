@@ -17,13 +17,49 @@
 %\makeindex
 
 \usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Fira Mono}
 \usepackage[english]{babel}
 
 \usepackage{color}
+\usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage[linktocpage=true]{hyperref}
 \usepackage{graphicx}
+
+\lstdefinelanguage{Rust}{
+  morekeywords={abstract, alignof, as, become, box, break, const, continue, crate, do, else, enum, extern, false, final, fn, for, if, impl, in, let, loop, macro, match, mod, move, mut, offsetof, override, priv, proc, pub, pure, ref, return, Self, self, sizeof, static, struct, super, trait, true, type, typeof, unsafe, unsized, use, virtual, where, while, yield},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  emph={Copy, Send, Sized, Sync, Drop, Fn, FnMut, FnOnce, Box, ToOwned, Clone, PartialEq, PartialOrd, Eq, Ord, AsRef, AsMut, Into, From, Default, Iterator, Extend, IntoIterator, DoubleEndedIterator, ExactSizeIterator, Option, Some, None, Result, Ok, Err, SliceConcatExt, String, str, ToString, Vec},
+  %otherkeywords={::, ->, #, !, -, +, *, /, \%, \&, \&\&, ^, |, ||, <<, >>, =, ==, !=, <=, >=, <, >},
+}
+\lstset{ 
+  backgroundcolor=\color{white},  
+  basicstyle=\footnotesize\ttfamily,      
+  breakatwhitespace=false,       
+  breaklines=true,            
+  captionpos=b,              
+  commentstyle=\color{black!50}, 
+  keepspaces=true,
+  keywordstyle=\bfseries,
+  language=Rust,
+  numbers=left,                    
+  numbersep=5pt,                  
+  numberstyle=\tiny\ttfamily, 
+  rulecolor=\color{black}, 
+  showspaces=false,       
+  showstringspaces=false,
+  showtabs=false,       
+  stepnumber=1,
+  stringstyle=\color{black!70}, 
+  tabsize=2,
+  title=\lstname,
+}
 
 \usepackage{tikz}
 \usepackage{tikz-cd}
@@ -73,7 +109,7 @@
   of them are based on ad-hoc premises.
   % review of existing solutions
   Library implementations seen in NumPy, Matlab, Mathematica, and R are all
-  perfectly serviceable, but all function on noninteroperable semantics.
+  perfectly serviceable, but all function on non-interoperable semantics.
   % outline of solution
   By formalizing a minimal set of operations on multidimensional arrays, we can
   describe the differing semantics of other libraries.
@@ -150,7 +186,7 @@ models, and that is what we will explore in this chapter.
 \end{definition}
 \begin{observation}
   \label{ob:finset}
-  Some observations on Defintion~\ref{def:finset}:
+  Some observations on Definition~\ref{def:finset}:
   \begin{itemize}
     \item The set of natural numbers less than 1, \(\Nat_{<1}\) is the singleton set \(\{0\}\).
     \item The set of natural numbers less than 0, \(\Nat_{<0}\) is the empty set.
@@ -180,7 +216,7 @@ models, and that is what we will explore in this chapter.
 \end{definition}
 \begin{observation}
   \label{ob:cuboid}
-  Some observations on Defintion~\ref{def:cuboid}:
+  Some observations on Definition~\ref{def:cuboid}:
   \begin{itemize}
     \item The set of natural numbers less than \(k\) is itself a 1-dimensional finite natural cuboid.
     \item The 0-dimensional natural cuboid is the singleton set \(\{()\}\).
@@ -532,7 +568,7 @@ free groups of some order, with additional equalities to obtain the desired stru
       that is the product of its elements \(a : o \to \prod o\)
     \item For every object \(o : \Nat_k \to \Nat\),
       there is an arrow \(a\) from it, to the single-element sequence
-      that cotains as its sole element, the number of elements in \(o\), in
+      that contains as its sole element, the number of elements in \(o\), in
       other words, \(a : o \to k\).
   \end{itemize}
   These two schema correspond to the operations \(\flat\) and \(\sharp\), respectively.
@@ -705,7 +741,7 @@ The deletion of an element of the shape in this manner can model many things.
 As an example,
 consider the rank-2 array \(A = \left[\begin{smallmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{smallmatrix}\right]\).
 We have that \(\sharp A = [2\; 3]\). Selecting only the first row \([1\;2\;3]\) yields an array of shape 3,
-meaning we have elimintated the 2 --- it has been `divided out.'
+meaning we have eliminated the 2 --- it has been `divided out.'
 
 This example of array slicing is evocative and seems correct, but ultimately does not fit our categorical
 definition: there are two distinct operations with which to slice \(A\) into a shape of 3 --- the first row,
@@ -773,7 +809,7 @@ relation on a set given by equality
 \(\Delta_S = \{ (x, x) \mid x \in S \} = \{ (x, y) \mid x, y \in S \land x = y \}\)
 this also vaguely suggests what operation we might pursue.
 
-Lastly, we remember that diagonal matrixes have only non-zero entries on the diagonal,
+Lastly, we remember that diagonal matrices have only non-zero entries on the diagonal,
 and that the trace of a matrix is exactly the sum of the elements on the diagonal.
 
 Hence in removing a duplicate array index, it seems prudent to interpret that as
@@ -784,7 +820,7 @@ Elimination of duplicate indexes is taking the diagonal.
 
 Just as division gave rise to interesting interpretations, so does multiplication.
 Multiplication over the natural numbers is a total function, associative, commutative,
-and defined recursively in terms of addtion. We shall model two different cases of 
+and defined recursively in terms of addition. We shall model two different cases of 
 multiplication, the first being multiplication by a constant.
 
 \begin{definition}
@@ -834,7 +870,7 @@ diagram commutes:
 \end{center}
 
 There is another kind of multiplication which would be desirable to cover, but which is
-not easily modelable since \(\Arr\ADSSFR\) is not a carthesian category; meaning it does
+not easily modelable since \(\Arr\ADSSFR\) is not a Cartesian category; meaning it does
 not have an easy way to have ``multi-argument'' arrows. I am at present not even sure we can
 consistently make actual products that have the universal property.
 
@@ -855,7 +891,7 @@ consistently make actual products that have the universal property.
   diagonals, array tilings, and outer products.
 \end{definition}
 
-The interpretaiton of \(\pi\) arrows is trickier, since they already bear a resemblance
+The interpretation of \(\pi\) arrows is trickier, since they already bear a resemblance
 to concatenation of \(\div\) arrows. As noted, this is an attempt at mimicking
 the properties of the categorical product: on their own they signify nothing.
 
@@ -898,8 +934,8 @@ is simply to use the Product Category construction.
   We call this the category of arrays with domains.
 \end{definition}
 
-This should nicely incapsulate the scope of information we wish to work with, and provide
-a convenient embedding into the category given by the array functions themsevles: map
+This should nicely encapsulate the scope of information we wish to work with, and provide
+a convenient embedding into the category given by the array functions themselves: map
 the shape to the corresponding cuboid, and draw up a function with this cuboid as the
 domain, and the set becomes the codomain.
 
@@ -950,11 +986,11 @@ We can now properly define the category of arrays.
 
   \begin{itemize}
     \item In the category of arrays, the products are implicitly given. Since th domains
-      of all arrays are (usually) cartesian products already, an array with its codomain being
-      a cartesian product as well will readily be a product object from the definition of
+      of all arrays are (usually) Cartesian products already, an array with its codomain being
+      a Cartesian product as well will readily be a product object from the definition of
       the arrow category on sets (in fact, several product objects
       at once, if the domain is a cuboid with more than two dimensions.) To compute the outer
-      product, we posecompose with an appropriate function.
+      product, we postcompose with an appropriate function.
 
     \item The reduce operation is tantamount to postcomposition with a
       monoid morphism from the free monoid over a set, to another (possibly more useful) monoid.
@@ -1127,7 +1163,7 @@ arrays in a top-down manner.
 
 \begin{remark}
   Contrary to the category-theoretical definition of the outer product given in
-  Defintion~\ref{def:category-of-arrays}
+  Definition~\ref{def:category-of-arrays}
 \end{remark}
 
 \begin{example}
@@ -1171,42 +1207,7 @@ arrays in a top-down manner.
   otherwise thought of as fundamental.
 \end{example}
 
-\chapter{Implementation}
-
-\section{Rust}
-
-For the implementation I have chosen the Rust programming language. This
-is for several reasons.
-
-Rust is developed by Mozilla, which first appeared in early beta in 2010. It
-builds on many modern ideas of programming-language design, and have benefitted
-greatly from a duration of open beta development where the community could submit
-proposals styled after the IETF\footnote{%TODO
-} RFC process. This has led to the 1.0 release having a solid set of standard libraries,
-as well as a very ergonomic syntax.
-
-Core to Rust's usefullness is that it is semantically an ML-family language, with a strong type
-system based on `Traits' which mimic Haskell's type classes. Futher, it imposes an additional
-inference system based on the idea of attaching abstract lifetimes to stack frames, which allows
-the compiler to reason thoroughly about ownership of allocated resources.
-
-Syntactically, Rust resembles Scala and Apple's Swift, but has no garbage collector; instead relying
-on the lifetime inference (``borrow checker'') to decide when resources can be safely freed. This not
-only allows Rust to have similar performance to, and compete with C/C++, but the strength of the lifetime
-inference system allows almost complete elimination of data races. This makes Rust the only language
-where concurrency is not only encouraged, but in fact easy.
-
-Rust therefore provides the perfomance expected of a data-processing library, but also
-provides a novel paradigm of library design using the borrow checker. The borrow checker provides
-statically enforced guarantees against dangling pointers, which eliminates the problems
-of data sharing.
-
-For instance, UTF-8 strings are handled in Rust via two types: \texttt{String} and \texttt{\&str}.
-\texttt{String} is a heap-allocated vector of UTF-8 data, which is growable and is freed upon destruction.
-Meanwhile \texttt{\&str} is a non-allocating data slice, which refers to a section of a \texttt{String}.
-The borrow checker then statically ensures that a \texttt{\&str} never points to deallocated memory, and
-the programmer can pass around immutable slices and never worry about data races or data duplication\footnote{
-This design repeats with generic growable arrays and array slices, and many other data structures.}.
+\chapter{Towards Practicality}
 
 \section{Practical Array Functions}
 
@@ -1248,7 +1249,7 @@ thus given by the function
   &= x_0 k_1 \dots k_{d-1} + x_1 k_2 \dots k_{d-1} + \cdots + x_{d-2} k_{d-1} + x_{d-1} \;.
 \end{align*}
 
-Notice that this is a linear function given by the scalar proudct of the vector of coordinates
+Notice that this is a linear function given by the scalar product of the vector of coordinates
 \(\brm x = [x_0\; \dots\; x_{d-1}]\) by the vector of radixes \(\brm r\) given by
 \begin{align*}
   \brm r_i &= k_{i+1} \brm r_{i+1} \\
@@ -1300,8 +1301,6 @@ By Theorem~\ref{the:linear-decompose}, we even see this relationship with linear
 and it suggests to us lines of inquiry: what if the flat radix function is \emph{not} a mixed radix
 conversion? What if the flat radix function is instead affine?
 
-For every array operation that does not change the entries of the array (map, reduce, outer product)
-
 Given the array shape, \(\sharp A = [a\; b\; c]\) we know that \(A\) has the flat radix given
 by the covector\footnote{Every covector gives rise to a linear functional by the scalar product.} \([bc\; c\; 1]\).
 If we transpose \(A\) by swapping the two last dimensions
@@ -1310,29 +1309,29 @@ it turns out that we can specify \(A'\) in terms of \(\flat A\) like so:
 \[A' = (\brm x \mapsto [bc\; 1\; c]\cdot\brm x) \circ \flat A\quad.\]
 Any time we apply a transpose to an array, we can represent it as that same transpose only applied
 to the linear map from the coordinate cuboid of the array to the flat representation; leaving the flat
-representaiton intact.
+representation intact.
 
 This property extends in a number of interesting ways to both repetition and diagonals:
 given an array \(A\) with shape \(\sharp A = [a\; b\; b]\) it has the flat radix \([b^2\;b\; 1]\).
 Applying the diagonal operation on the like axes \(A' = \diag_{1,2} A\) yields an array of the shape
 \(\sharp A' = [a\; b]\) and is expressible in terms of \(\flat A\) by the covector \([(b^2 + b)\; 1]\).
-Given the same array and the tiling operation \(A' = \tile_{\times c, 3} A\) yeilds an array
+Given the same array and the tiling operation \(A' = \tile_{\times c, 3} A\) yields an array
 of shape \(\sharp A' = [a\; b\; b\; c]\) and is expressible in terms of \(\flat A\) by the covector
 \([b^2\; b\; 1\; 0]\).
 
 In essence, in the covector translation from cuboid coordinates to flat index, we see that
-transposes map to permutation of the components, diagnonals map to addition of components,
+transposes map to permutation of the components, diagonals map to addition of components,
 and tilings map to insertion of zeros.
 
 This, astute readers might recognize as operations which are easily modelable by left-multiplying
-our mixed-radix base covectors to various matrixes
-multiplication: permuting covectors is done with permutation matrixes, adding up columns
-for the diagonal opeartion can be done by multiplying by a \(d \times (d-1)\) matrix where
+our mixed-radix base covectors to various matrices
+multiplication: permuting covectors is done with permutation matrices, adding up columns
+for the diagonal operation can be done by multiplying by a \(d \times (d-1)\) matrix where
 one col
 
 \section{Affine Transformations}
 
-As we have seen, there is a correspondence between operations on linear functions' covector representaitons
+As we have seen, there is a correspondence between operations on linear functions' covector representations
 and the array operations outlined; but we are still short of one kind of very common operation: the slice.
 
 Slicing an array can trivially fail to preserve the value-at-origin, meaning it does not uphold this invariant
@@ -1358,14 +1357,14 @@ equal to the \((n+1)\)-th element of \(A\) like so
 which is essentially the `tail' operation known from most functional programming languages.
 
 Similarly we can also implement 'stride' by deviating from the strict requirement that the linear function
-in question be a mixed radix base conversion subjected to multiplication by permutation matrixes. For a given
+in question be a mixed radix base conversion subjected to multiplication by permutation matrices. For a given
 flat array \(A = \flat A\) we can take every second entry by composing with the function \(f(\brm x) = 2\brm x\).
 
-\section{Homegnous Coordinates in Earnest}
+\section{Homogenous Coordinates in Earnest}
 
-The idea of using affine functions to manipuate arrays without having to re-create the underlying flat
+The idea of using affine functions to manipulate arrays without having to re-create the underlying flat
 representation in memory, can extend to more general arrays as well. For an arbitrary array \(A\) we can
-achieve much the same resut --- the ability to represent tiling, diagnoals, transposes, and slices ---
+achieve much the same result --- the ability to represent tiling, diagonals, transposes, and slices ---
 by precomposing it with an affine function represented by a matrix in homogenous coordinates:
 \[ A = A \circ \brm I \]
 In the case of \(A\) being flat, this reduces to the above case of an affine function.
@@ -1378,6 +1377,253 @@ this preserves the span of the row vectors.)
 
 Matrices are tried and true, easy to implement, and will form the basis of the copy-less slicing of my library.
 
+\chapter{Implementation}
+
+\section{Rust}
+
+For the implementation I have chosen the Rust programming language. This
+is for several reasons.
+
+Rust is developed by Mozilla, which first appeared in early beta in 2010. It
+builds on many modern ideas of programming-language design, and have benefited
+greatly from a duration of open beta development where the community could submit
+proposals styled after the IETF\footnote{Internet Engineering Task Force}
+RFC process. This has led to the 1.0 release having a solid set of standard libraries,
+as well as a very ergonomic syntax.
+
+Core to Rust's usefulness is that it is semantically an ML-family language, with a strong type
+system based on `Traits' which mimic Haskell's type classes. Further, it imposes an additional
+inference system based on the idea of attaching abstract lifetimes to stack frames, which allows
+the compiler to reason thoroughly about ownership of allocated resources.
+
+Syntactically, Rust resembles Scala and Apple's Swift, but has no garbage collector; instead relying
+on the lifetime inference (``borrow checker'') to decide when resources can be safely freed. This not
+only allows Rust to have similar performance to, and compete with C/C++, but the strength of the lifetime
+inference system allows almost complete elimination of data races. This makes Rust the only language
+where concurrency is not only encouraged, but in fact easy.
+
+Rust therefore provides the performance expected of a data-processing library, but also
+provides a novel paradigm of library design using the borrow checker. The borrow checker provides
+statically enforced guarantees against dangling pointers, which eliminates the problems
+of data sharing.
+
+For instance, UTF-8 strings are handled in Rust via two types: \texttt{String} and \texttt{\&str}.
+\texttt{String} is a heap-allocated vector of UTF-8 data, which is growable and is freed upon destruction.
+Meanwhile \texttt{\&str} is a non-allocating data slice, which refers to a section of a \texttt{String}.
+The borrow checker then statically ensures that a \texttt{\&str} never points to deallocated memory, and
+the programmer can pass around immutable slices and never worry about data races or data duplication\footnote{
+This design repeats with generic growable arrays and array slices, and many other data structures.}.
+
+\section{Design Overview}
+
+I've chosen to call my library \texttt{cat\_array} for ``Categorical Arrays.''  It is made with the
+\texttt{cargo} packaging manager, and is available on GitHub\footnote{%TODO
+}. It is meant to showcase the power of the operations listed in Section~\ref{sec:array-operations},
+and isn't intended to be a realistic contender against more optimized code.
+
+However, in using Rust, we gain the benefit of Rust's main selling point: zero-cost abstractions.
+Rust aims to encroach on the niche which C++ fills in providing the systems programming capability
+of C together with high-level abstractions. In C++'s case, templates and object orientation; in the
+case of Rust, a Hindley-Milner type system and static memory and data-race safety enforced through
+linear types.
+
+Rust uses the concept of a trait which is used both as constraints in parametric polymorphism,to
+implement ad-hoc polymorphism, and also to implement dynamic dispatch polymorphism. Using this feature
+to define the `core' functionality, rather than deciding on a central type beforehand, allows for
+a more organic development process and to closer approximate the forgiving nature of e.g. NumPy's
+typing discipline.
+
+The core functionality is described by the traits \texttt{ArrayLike}, \texttt{ArrayLikeMut}, and
+the \texttt{Into*} trait family. They describe the operations of shape (\(\sharp\)), flat (\(\flat\)),
+reshape (\(\varrho\)), transpose (\(A \circ \sigma\)), diagonal (\(\diag\)), and tiling (\(\tile\))
+through the appropriately named trait-associated types and member functions.
+
+Notably, every operation has its own return-type specified in the trait; which allows for very accurate
+description of array functionality. Unfortunately, many of these operations in their most general forms
+rely on difficult-to-describe data structures (permutations for the transpose, notably) and are thus
+implemented to allow only the `simplest' forms (transpose can only swap two dimensions, tiling always
+makes a new most-significant index, etc.)
+
+The existence of three traits (actually, two traits and a family of traits) exists to take full advantage
+of the structure of Rust's ownership semantics: owned, referenced, and mutably referenced values all
+allow for different operations (notably, \texttt{ArrayLikeMut} does not allow tiling as it is uncertain what
+assigning to a single entry in a mutable tiled array should do to the underlying array.) To alleviate
+this impediment, we get the \texttt{IntoTranspose} trait and others like it, allowing the composition
+of `swap' permutations without new memory allocation in types that support it.
+
+There is also the matter of the reduce (\(\reduce\)), map, and outer-product operations which are not
+represented. Whereas these might be easy to represent in a marginally more expressive language like
+Haskell, it just so happens that Rust entirely lacks higher-kinded polymorphism. Type variables can
+only take on the values of concrete types; not type constructors\footnote{This in turn becomes troublesome
+when one wishes to make full use of the explicit lifetimes of stack-allocated data which Rust incorporates
+into the ownership model.}.
+
+Map, reduce, and outer-product are thus instead supplied through their own concrete types, implemented
+in a lazy manner, allowing the programmer to compute only the sections of an array they need and also
+determine whether it is necessary to compute the full array.
+
+\section{Bootstrapping}
+
+The idea of multidimensional arrays is comprehensive, and require a lot of interconnected functionality.
+For instance, just the very act of indexing an array \(A(x_1, x_2, \dots, x_d)\) requires a way to represent
+the indexing vector \(\brm x = [x_1\; x_2\; \dots\;x_d]\) as an array itself.
+
+This leads to an incremental design centered around the \texttt{DummyArray} type and its implementation of
+the two core traits. The dummy type implements all functionality using the \texttt{unimplemented!()} macro
+in Rust, causing every array-related call to cause an execution-thread panic.
+
+Similarly, the dummy array type allows `stubbing out' the associated types which have not yet been determined.
+
+In this vein, several `simple' array types are given, developed in an interconnected manner: \texttt{Void},
+\texttt{Unit}, \texttt{Same}, \texttt{Singleton}, \texttt{Singletile}, and \texttt{Empty}. Additionally
+an instance of array functionality is defined for every standard-library type that implements slicing
+(including but not limited to: string types, heap-allocated arrays, growable vectors, and slices.)
+
+The necessity of such simple array types is to fulfill the requirement of the shape and indexing operation: the
+shape of an array is always a rank-1 array, and the shape of a rank-1 array is always a singleton; similarly
+the indexing operation takes as an argument an array of coordinate components. With just these simple types defined
+it is already possible to hook arrays into the extensive \texttt{Iterator} functionality provided by the Rust
+standard library.
+
+\section{Overview of the ArrayLike traits}
+
+\textit{Warning:} This section will be heavy in Rust code; a passing familiarity is expected, and can
+be gained from the official documentation\cite{RDOC117}.
+
+The \texttt{ArrayLike} trait requires several functions, which can be roughly divided into two categories.
+The member functions that `inspect' the array type:
+
+\begin{lstlisting}
+fn rank(&self) -> usize;
+
+fn len(&self) -> usize;
+
+type Entry;
+fn get<I>(&self, coord : &I) -> &Self::Entry
+  where I : ArrayLike<Entry = isize>;
+
+type Shape : ArrayLike<Entry = usize>;
+fn shape(&self) -> &Self::Shape;
+\end{lstlisting}
+
+And the member functions that create new arrays:
+
+\begin{lstlisting}
+type Flat : ArrayLike<Entry = Self::Entry>;
+fn flat(&self) -> Self::Flat;
+
+type Reshape : ArrayLike<Entry = Self::Entry>;
+fn reshape<I>(&self, shape : &I) -> Self::Reshape
+  where I : ArrayLike<Entry = usize>;
+
+type Slice : ArrayLike<Entry = Self::Entry>;
+fn slice<I>(&self, cuboid : &I) -> Self::Slice
+  where I : ArrayLike<Entry = (isize, Option<isize>, isize)>;
+
+type Fixate : ArrayLike<Entry = Self::Entry>;
+fn fixate(&self, ax : usize, at : isize) -> Self::Fixate;
+
+type Transpose : ArrayLike<Entry = Self::Entry>;
+fn transpose(&self, ax1 : usize, ax2 : usize) -> Self::Transpose;
+
+type Reverse : ArrayLike<Entry = Self::Entry>;
+fn reverse(&self, ax : usize) -> Self::Reverse;
+
+type Diagonal : ArrayLike<Entry = Self::Entry>;
+fn diagonal(&self, ax1 : usize, ax2 : usize) -> Self::Diagonal;
+
+type Tile : ArrayLike<Entry = Self::Entry>;
+fn tile(&self, len : usize) -> Self::Tile;
+\end{lstlisting}
+
+Notice here the pattern
+\begin{lstlisting}
+fn func<I>(...) where I : ArrayLike<Entry = ...>
+\end{lstlisting}
+which denotes that the function can take as argument any array type so long
+as it contains the correct data type (often subject to runtime checks, since rank
+and shape cannot be determined statically.)
+
+There are two particular functions we have neglected to mention, which is the reversal of an array
+over a given axis, and the other is the elimination of an axis by fixing it to a pre-set index
+as mentioned in the discussion following Definition~\ref{def:category-of-reductions}. These two
+operations are called \texttt{Reverse} and \texttt{Fixate} respectively, and are relatively uncontroversial.
+
+The fixate operation is essentially the concept of currying, applied to arrays.
+The distinction between fixating and slicing is that slicing cannot wholly eliminate an axis of
+an array; only reduce it to an upper bound of 1. Fixation does the same, but additionally gets rid
+of the axis entirely.
+
+The \texttt{ArrayLike::shape} function is interesting in that it is the only array-returning function in the
+trait that does not return an array, but a reference to an array internal to the parent array type.
+Notice that lifetime elision\footnote{\cite[chapter~3.4]{RNOM117}} is at play, and the full type signature
+for \texttt{shape} is:
+\begin{lstlisting}
+fn shape<'a>(&'a self) -> &'a Self::Shape;
+\end{lstlisting}
+making it clear that the shape of an array should be available as internal data of the array.
+
+The other array-returning functions all return actual array types, intended to be wrappers around
+the reference to \texttt{self} to avoid copying.
+
+The counterpart to \texttt{ArrayLike} is of course \texttt{ArrayLikeMut}, which covers many
+of the same operations, but in a mutable manner. It is based on the \texttt{set} function which
+mirrors \texttt{ArrayLike::get}:
+\begin{lstlisting}
+fn set<I>(&mut self, coord : &I, val : <Self as ArrayLike>::Entry) -> &mut Self
+  where I : ArrayLike<Entry = isize>;
+\end{lstlisting}
+Notice that we return the mutable reference to \texttt{self} at the end of the call,
+allowing for classic method chaining. Notice also how Rust avoids the problem of trait-member
+namespace pollution by the \texttt{<Type as Trait>::member} syntax.
+
+The operations supported in \texttt{ArrayLikeMut} are the same as in \texttt{ArrayLike},
+save for the exclusion of the \texttt{ArrayLike::Tile}:
+\begin{lstlisting}
+  type FlatMut : ArrayLike<Entry = <Self as ArrayLike>::Entry> + ArrayLikeMut;
+  fn flat_mut(&mut self) -> Self::FlatMut;
+
+  type ReshapeMut : ArrayLike<Entry = <Self as ArrayLike>::Entry> + ArrayLikeMut;
+  fn reshape_mut<I>(&mut self, shape : &I) -> Self::ReshapeMut
+    where I : ArrayLike<Entry = usize>;
+
+  type SliceMut : ArrayLike<Entry = <Self as ArrayLike>::Entry> + ArrayLikeMut;
+  fn slice_mut<I>(&mut self, cuboid : &I) -> Self::SliceMut
+    where I : ArrayLike<Entry = (isize, Option<isize>, isize)>;
+
+  type FixateMut : ArrayLike<Entry = Self::Entry> + ArrayLikeMut;
+  fn fixate_mut(&mut self, ax : usize, at : isize) -> Self::FixateMut;
+
+  type TransposeMut : ArrayLike<Entry = <Self as ArrayLike>::Entry> + ArrayLikeMut;
+  fn transpose_mut(&mut self, ax1 : usize, ax2 : usize) -> Self::TransposeMut;
+
+  type ReverseMut : ArrayLike<Entry = <Self as ArrayLike>::Entry> + ArrayLikeMut;
+  fn reverse_mut(&mut self, ax : usize) -> Self::ReverseMut;
+  
+  type DiagonalMut : ArrayLike<Entry = <Self as ArrayLike>::Entry> + ArrayLikeMut;
+  fn diagonal_mut(&mut self, ax1 : usize, ax2 : usize) -> Self::DiagonalMut;
+\end{lstlisting}
+All of the \texttt{*Mut} types implement both \texttt{ArrayLike} and \texttt{ArrayLikeMut},
+and are intended to allow things like assigning to certain subsections of an array.
+
+Last there is the \texttt{Into*} family of traits which all have the structure:
+\begin{lstlisting}
+pub trait IntoFlat : ArrayLike {
+  type To : ArrayLike<Entry = <Self as ArrayLike>::Entry>;
+  fn into_flat(self) -> Self::To;
+}
+\end{lstlisting}
+Notice here that the \texttt{IntoFlat::into\_flat} function does not capture \texttt{self} by
+reference, but by \textit{value}. This means the function takes ownership of \texttt{self} and
+all responsibility of running the deconstructor.
+
+Traits like this will be particularly useful for a generalized reshape wrapper and generalized slice wrapper
+types, with which we would like to avoid nesting unnecessarily, since they compose.
+
+\section{Reference implementation: \texttt{DummyArray}}
+
+
+
 \vfill
 \begin{center}\itshape End report.\end{center}
 \clearpage
@@ -1387,7 +1633,19 @@ Matrices are tried and true, easy to implement, and will form the basis of the c
 \phantomsection
 \addcontentsline{toc}{chapter}{Appendices}
 
-\section{Placeholder}
+\section{Notation guide}
+
+\begin{description}[align=right,labelwidth=7em]
+  \item[\(\sharp A\)] Shape of an array (Definition~\ref{def:shape})
+  \item[\(\flat A\)] Flat/in-order traversal of an array (Definition~\ref{def:flat})
+  \item[\(\varrho(A, \rho)\)] Reshape of array (Definition~\ref{def:reshape})
+  \item[\(A \circ \sigma\)] Generalized transpose of array (Definition~\ref{def:transpose})
+  \item[\(f \circ A\)] Element-wise mapping of array (Definition~\ref{def:map})
+  \item[\(\tile_{\times k, x} A\)] Tiling an array (Definition~\ref{def:tiling})
+  \item[\(\diag_{x, y} A\)] Diagnoally traverse an array (Definition~\ref{def:diagonal})
+  \item[\(\reduce^k_{(S, \oplus, \epsilon)} A\)] Reducing an array by a monoid (Definition~\ref{def:reduce})
+  \item[\(A \oprodby f B\)] Outer product of arrays (Definition~\ref{def:outer-product})
+\end{description}
 
 \vfill
 \begin{center}\itshape End appendices.\end{center}

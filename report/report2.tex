@@ -91,7 +91,6 @@
 \newcommand\oprodby[1]{\mathop{\operatorname*{\,\brm{by}}_{#1}}}
 
 % TODO EDITING:
-%   Unified 0-indexing in all formulas
 %   Scalar/unit array distinction
 %   Full stops outside delimiting punctuation
 %   Footnotes before full stops
@@ -272,45 +271,6 @@ models, and that is what we will explore in this chapter.
   \end{align*}
 \end{remark}
 
-%\begin{remark}
-%  \label{rem:deep-nesting}
-%  For deeper nested arrays than two dimensions, we nest the usual matrix notation,
-%  with different brackets for clarity:
-%  \begin{align*}
-%    \begin{bmatrix}
-%      (a_{111}\; \cdots\; a_{11p}) & \cdots & (a_{1m1}\; \cdots\; a_{1mp}) \\
-%      \vdots & \ddots & \vdots \\
-%      (a_{n11}\; \dots\; a_{n1p}) & \cdots & (a_{nm1}\; \dots\; a_{nmp})
-%    \end{bmatrix}
-%  \end{align*}
-%  \begin{align*}
-%    \begin{bmatrix}
-%      \begin{pmatrix}
-%        a_{1111} & \cdots & a_{111q} \\
-%        \vdots & \ddots & \vdots \\
-%        a_{11p1} & \cdots & a_{11pq} 
-%      \end{pmatrix} & \cdots &
-%      \begin{pmatrix}
-%        a_{1m11} & \cdots & a_{1m1q} \\
-%        \vdots & \ddots & \vdots \\
-%        a_{1mp1} & \cdots & a_{1mpq} 
-%      \end{pmatrix} \\
-%      \vdots & \ddots & \vdots \\
-%      \begin{pmatrix}
-%        a_{n111} & \cdots & a_{n11q} \\
-%        \vdots & \ddots & \vdots \\
-%        a_{n1p1} & \cdots & a_{n1pq} 
-%      \end{pmatrix} & \cdots &
-%      \begin{pmatrix}
-%        a_{nm11} & \cdots & a_{nm1q} \\
-%        \vdots & \ddots & \vdots \\
-%        a_{nmp1} & \cdots & a_{nmpq} 
-%      \end{pmatrix}
-%    \end{bmatrix} \\
-%  \end{align*}
-%  And so on. This will rarely be relevant.
-%\end{remark}
-
 \begin{definition}
   \label{def:shape}
   Given an \(d\)-dimensional array \(A\) over a cuboid
@@ -321,6 +281,7 @@ models, and that is what we will explore in this chapter.
 \end{definition}
 \begin{observation}
   \label{ob:shape}
+  Som observations on Definition~\ref{def:shape}:
   \begin{itemize}
     \item The shape of the shape is the rank, \(\sharp \sharp A = d\).
     \item The shape of the shape of the shape is always 1, meaning \(\sharp \sharp \sharp A = [1]\).
@@ -363,23 +324,28 @@ models, and that is what we will explore in this chapter.
   
   The standard lexicographical order of finite cuboid
   \(\Nat_{<k_0} \times \cdots \times \Nat_{<k_{d-1}}\) counts upwards by the
-  last index; that is to say in the order \((\dots,0), (\dots,1),\) \((\dots,2), \dots\)
+  last axis; that is to say in the order \((\dots,0), (\dots,1),\) \((\dots,2), \dots\);
+  the last axis is thus the `most significant.'
 
   Of note is also the reverse lexicographical order counts upwards by the first
-  index, \((0,\dots), (1,\dots), (2,\dots), \dots\).
+  axis, making the last axis the most significant: \((0,\dots), (1,\dots), (2,\dots), \dots\).
 
   The flat traversal of the array is then the composition of the finite
   sequence of points in the cuboid given by a lexicographical order,
   with the array \(A\), yielding a finite sequence --- a rank-1 array.
 
-  We denote the standard lexicographical traversal by \(\flat A\),
-  and the reverse by \(\tlaf A\).
-
-  The traversal of a rank-1 array is itself, \(\sharp \sharp A = 1 \impl \flat A = A\).
-
-  The shape of a traversal of an array is the product over the shape
-  of the array \(\sharp \flat A = \prod \sharp A\).
+  We denote the standard lexicographical traversal by \(\flat A\).
 \end{definition}
+\begin{observation}
+  \label{ob:flat}
+  Some observations on Definition~\ref{def:flat}
+  \begin{itemize}
+    \item The traversal of a rank-1 array is itself, \(\sharp \sharp A = 1 \impl \flat A = A\).
+
+    \item The shape of a traversal of an array is the product over the shape
+      of the array \(\sharp \flat A = \prod \sharp A\).
+  \end{itemize}
+\end{observation}
 
 \begin{observation}
   \label{ob:cardinality}
@@ -414,19 +380,13 @@ models, and that is what we will explore in this chapter.
   mimic reinterpreting an array as a sequence of contiguous cells in memory.
 
   By definition, our arrays are mathematical objects, and therefore have no
-  implementation or embedding in computer memory, but even so, the \(\flat A\)
-  corresponds to the C-layout of \(A\) and \(\tlaf A\) is the Fortran-layout.
+  implementation or embedding in computer memory, but even so, the lexicographical
+  traversal corresponds to the C-layout and the reverse lexicographical
+  traversal is the Fortran-layout.
 
   The reverse lexicographical traversal is rarely useful, save to illustrate
   this point.
 \end{observation}
-
-\begin{remark}
-  We shall refer to the standard lexicographical traversal as the `flat traversal'
-  and only distinguish it from the reverse when both are used in the same
-  context.
-\end{remark}
-
 
 \begin{definition}
   \label{def:reshape-comp} 
@@ -475,42 +435,25 @@ models, and that is what we will explore in this chapter.
 \begin{definition}
   \label{def:reshape}
   Given an array \(A\) and a reshape-compatible shape \(\rho\), meaning \(\prod \sharp A = \prod\rho\),
-  there is an array \(B\) which is also reshape-compatible \(\sharp B = \rho\) and
+  there is a unique array \(B\) which is also reshape-compatible \(\sharp B = \rho\) and
   has the same traversal as the first array \(\flat A = \flat B\).
   
   The array \(B\) is called the \(\rho\)-shaped reshape of \(A\), and we denote
   it \(B = \varrho(A, \rho)\).
 \end{definition}
 
-\begin{theorem}
-  \label{the:unique-reshape}
-  The reshape operation \(\varrho(A, \rho)\) is a partial function.
-
-  It is partial in that it is by definition undefined when \(\prod \sharp A \ne \prod \rho\).
-
-  We prove uniqueness by contradiction.
-\end{theorem}
-\begin{proof}
-  Suppose there exists two distinct arrays \(B_1, B_2\) which are both reshapes of \(A\) with
-  the same shape \(\rho\)
-  \begin{align*}
-    B_1 &= \varrho(A, \rho) \\
-    B_2 &= \varrho(A, \rho) \\
-    B_1 &\ne B_2
-  \end{align*}
-  which therefore  have the given shape \(\sharp B_1 = \sharp B_2 = \rho\)
-  and both have the same traversals as the original array \(\flat B_1 = \flat B_2 = \flat A\),
-  and which are not equal \(B_1 \neq B_2\).
-  
-  This implies that there exists an index into the two arrays \(X = [x_1\; \dots\; x_d], \sharp X = \sharp \rho\),
-  such that \(B_1(X) \neq B_2(X)\).
-
-  By the definition of traversals there exists a number \(k\)
-  so that that \(B_1(X) = (\flat B_1)(k)\) and \(B_2(X) = (\flat B_2)(k)\).
-  
-  That index must have unequal values in both traversals of the arrays, \((\flat B_1)(k) \neq (\flat B_2)(k)\),
-  which is inconsistent with the statement that the entire traversals of both are equal, \(\flat B_1 = \flat B_2\). \contradict
-\end{proof}
+\begin{observation}
+  \label{ob:reshape}
+  Some observations on Definition~\ref{def:reshape}:
+  \begin{itemize}
+    \item The reshape operation is a partial \emph{function}. Given an array \(A\) and a compatible
+      shape \(\rho\), there is only one possible array \(B\) that fullfills
+      both \(\sharp B = \rho\) and \(\flat A = \flat B\).
+    \item The reshape operation is a \emph{partial} function, in that it is undefined for non-compatible
+      shapes.
+    \item Reshaping to one axis is the same as flattening, \(\varrho(A, \sharp \flat A) = \flat A\).
+  \end{itemize}
+\end{observation}
 
 \begin{example}
   \label{ex:reshape}
@@ -524,14 +467,6 @@ models, and that is what we will explore in this chapter.
     \end{bmatrix}
   \end{align*}
 \end{example}
-
-\begin{remark}
-  \label{def:rho-func}
-  The reshape function \(\varrho(A, \rho)\) is technically a partial function; it is
-  undefined if the shape of \(A\) is not reshape compatible with \(\rho\).
-
-  Reshaping to one axis is the same as flattening, \(\varrho(A, \sharp \flat A) = \flat A\).
-\end{remark}
 
 \section{Categorical Setting}
 
@@ -1010,7 +945,7 @@ arrays in a top-down manner.
 \begin{remark}
   \label{rem:functions}
   Many useful operations can be derived from the function-nature of arrays. We touched
-  on this in Definition \ref{def:flat}, where we precomposed an array with a map
+  on this in Definition \ref{def:flat}, where we precomposed an array with a monotone map
   from natural numbers to the domain of the array.
 
   In the following definitions we will touch upon less radical functions
@@ -1347,9 +1282,9 @@ Let us consider the trivial example of a flat array, which decomposes into itsel
 identity function.
 \begin{align*}
   A &= \flat A \\
-  A &= \flat A \circ \mrm{id}_{\Real^1} \\&= A \circ \mrm{id}_{\Real^1}
+  A &= \flat A \circ \mrm{id}_{\Nat^1} \\&= A \circ \mrm{id}_{\Nat^1}
 \end{align*}
-In order to slice \(A\), we might exchange the linear function \(\mrm{id}_{\Real^1}\) with a function of the form
+In order to slice \(A\), we might exchange the linear function \(\mrm{id}_{\Nat^1}\) with a function of the form
 \[ f(\brm x) = [1] \cdot \brm x + 1 \]
 which would yield an array \(A' = \flat A \circ f\) with the property that the \(n\)-th element of \(A'\) is
 equal to the \((n+1)\)-th element of \(A\) like so

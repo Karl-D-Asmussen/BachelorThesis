@@ -3,11 +3,11 @@
 mod macros;
 
 pub mod dummy;
-pub mod void;
+//pub mod void;
 pub mod unit;
-pub mod same;
+//pub mod same;
 pub mod singleton;
-pub mod singletile;
+//pub mod singletile;
 
 pub mod impl_slice;
 

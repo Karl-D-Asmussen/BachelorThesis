@@ -18,7 +18,7 @@ impl<A, T> ArrayLike for A where A : Deref<Target = [T]> {
   
   fn rank(&self) -> usize { 1 }
   fn len(&self) -> usize { self.deref().len() }
-  fn shape(&self) -> Self::Shape { Unit(self.deref().len()) }
+  fn shape(&self) -> &Self::Shape { &Unit(self.len()) }
   fn get<I>(&self, coord : &I) -> &Self::Entry
   where I : ArrayLike<Entry = isize> { unimplemented!() }
 
@@ -33,4 +33,3 @@ impl<A, T> ArrayLike for A where A : Deref<Target = [T]> {
   fn diagonal(&self, ax1 : usize, ax2 : usize) -> Self::Diagonal { unimplemented!() }
   fn tile(&self, len : usize) -> Self::Tile { unimplemented!() }
 }
-

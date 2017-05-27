@@ -78,7 +78,7 @@ impl<T> IntoReshape for DummyArray<T> {
 
 impl<T> IntoSlice for DummyArray<T> {
   type To = DummyArray<T>;
-  fn into_sliced<I>(self, cuboid : &I) -> Self::To
+  fn into_slice<I>(self, cuboid : &I) -> Self::To
     where I : ArrayLike<Entry = (isize, Option<isize>, isize)> { unimplemented!() }
 }
 

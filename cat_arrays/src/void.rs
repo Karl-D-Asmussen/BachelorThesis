@@ -24,7 +24,7 @@ impl<T> ArrayLike for Void<T> {
   
   fn rank(&self) -> usize { 1 }
   fn len(&self) -> usize { 0 }
-  fn shape(&self) -> Self::Shape { Unit(0) }
+  fn shape(&self) -> &Self::Shape { &Unit(0) }
 
   fn get<I>(&self, coord : &I) -> &Self::Entry
   where I : ArrayLike<Entry = isize> {

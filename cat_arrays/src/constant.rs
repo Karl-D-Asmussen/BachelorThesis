@@ -16,65 +16,65 @@ pub struct ConstSl<'a, T : Clone>(T, &'a [usize], usize);
 pub struct ConstRefSl<'a, T : 'a + Clone>(&'a T, &'a [usize], usize);
 
 impl<T : Clone> Const<T> {
-  fn new(val : T, shape : Vec<usize>) -> Self {
+  pub fn new(val : T, shape : Vec<usize>) -> Self {
     let len = { shape.iter().fold(1, |a, b| a * b) };
     Const(val, shape, len)
   }
-  fn to_ref_sl<'a>(&'a self) -> ConstRefSl<'a, T> {
+  pub fn to_ref_sl<'a>(&'a self) -> ConstRefSl<'a, T> {
     ConstRefSl(&self.0, &self.1[..], self.2)
   }
-  fn to_ref<'a>(&'a self) -> ConstRef<'a, T> {
+  pub fn to_ref<'a>(&'a self) -> ConstRef<'a, T> {
     ConstRef(&self.0, self.1.clone(), self.2)
   }
-  fn to_sl<'a>(&'a self) -> ConstSl<'a, T> {
+  pub fn to_sl<'a>(&'a self) -> ConstSl<'a, T> {
     ConstSl((self.0).clone(), &self.1[..], self.2)
   }
 }
 
 impl<'a, T : 'a + Clone> ConstRef<'a, T> {
-  fn new(val : &'a T, shape : Vec<usize>) -> Self {
+  pub fn new(val : &'a T, shape : Vec<usize>) -> Self {
     let len = { shape.iter().fold(1, |a, b| a * b) };
     ConstRef(val, shape, len)
   }
-  fn to_(&'a self) -> Const<T> {
+  pub fn to_(&'a self) -> Const<T> {
     Const(self.0.clone(), self.1.clone(), self.2)
   }
-  fn to_ref_sl(&'a self) -> ConstRefSl<'a, T> {
+  pub fn to_ref_sl(&'a self) -> ConstRefSl<'a, T> {
     ConstRefSl(self.0, &self.1[..], self.2)
   }
-  fn to_sl(&'a self) -> ConstSl<'a, T> {
+  pub fn to_sl(&'a self) -> ConstSl<'a, T> {
     ConstSl(self.0.clone(), &self.1[..], self.2)
   }
 }
 
 impl<'a, T : 'a + Clone> ConstSl<'a, T> {
-  fn new(val : T, shape : &'a [usize]) -> Self {
+  pub fn new(val : T, shape : &'a [usize]) -> Self {
     let len = { shape.iter().fold(1, |a, b| a * b) };
     ConstSl(val, shape, len)
   }
-  fn to_(&self) -> Const<T> {
+  pub fn to_(&self) -> Const<T> {
     Const(self.0.clone(), self.1.to_owned(), self.2)
   }
-  fn to_ref(&'a self) -> ConstRef<'a, T> {
+  pub fn to_ref(&'a self) -> ConstRef<'a, T> {
     ConstRef(&self.0, self.1.to_owned(), self.2)
   }
-  fn to_ref_sl(&'a self) -> ConstRefSl<'a, T> {
+  pub fn to_ref_sl(&'a self) -> ConstRefSl<'a, T> {
     ConstRefSl(&self.0, self.1, self.2)
   }
 }
 
 impl<'a, T : 'a + Clone> ConstRefSl<'a, T> {
-  fn new(val : &'a T, shape : &'a [usize]) -> Self {
+  pub fn new(val : &'a T, shape : &'a [usize]) -> Self {
     let len = { shape.iter().fold(1, |a, b| a * b) };
     ConstRefSl(val, shape, len)
   }
-  fn to_(&self) -> Const<T> {
+  pub fn to_(&self) -> Const<T> {
     Const(self.0.clone(), self.1.to_owned(), self.2)
   }
-  fn to_ref(&'a self) -> ConstRef<'a, T> {
+  pub fn to_ref(&'a self) -> ConstRef<'a, T> {
     ConstRef(self.0, self.1.to_owned(), self.2)
   }
-  fn to_sl(&'a self) -> ConstSl<'a, T> {
+  pub fn to_sl(&'a self) -> ConstSl<'a, T> {
     ConstSl(self.0.clone(), self.1, self.2)
   }
 }
@@ -348,15 +348,15 @@ impl<'a, T : Clone + 'a> IntoTile for ConstRef<'a, T> {
 impl<'a, T> ArrayLike for ConstRefSl<'a, T> where T : Clone + 'a {
   type Entry = T;
   type Shape = [usize];
-  type Flat = Const<T>;
-  type Reshape = Const<T>;
+  type Flat = ConstRef<'a, T>;
+  type Reshape = ConstRef<'a, T>;
 
-  type Slice = Const<T>;
-  type Fixate = Const<T>;
-  type Transpose = Const<T>;
-  type Reverse = Const<T>;
-  type Diagonal = Const<T>;
-  type Tile = Const<T>;
+  type Slice = ConstRef<'a, T>;
+  type Fixate = ConstRef<'a, T>;
+  type Transpose = ConstRef<'a, T>;
+  type Reverse = ConstRef<'a, T>;
+  type Diagonal = ConstRef<'a, T>;
+  type Tile = ConstRef<'a, T>;
   
   fn rank(&self) -> usize { self.1.len() }
   fn len(&self) -> usize { self.2 }
@@ -367,36 +367,38 @@ impl<'a, T> ArrayLike for ConstRefSl<'a, T> where T : Clone + 'a {
     self.0
   }
 
-  fn flat(&self) -> Self::Flat { self.to_().into_flat() }
+  fn flat(&self) -> Self::Flat {
+    ConstRef::new(self.0, self.1.to_owned()).into_flat()
+  }
 
   fn reshape<I>(&self, shape : &I) -> Self::Reshape
   where I : ArrayLike<Entry = usize> {
-    self.to_().into_reshape(shape)
+    ConstRef::new(self.0, self.1.to_owned()).into_reshape(shape)
   }
 
   fn slice<I>(&self, cuboid : &I) -> Self::Slice
   where I : ArrayLike<Entry = (isize, Option<isize>, isize)> {
-    self.to_().into_slice(cuboid)
+    ConstRef::new(self.0, self.1.to_owned()).into_slice(cuboid)
   }
 
   fn fixate(&self, ax : usize, at : isize) -> Self::Fixate {
-    self.to_().into_fixate(ax, at)
+    ConstRef::new(self.0, self.1.to_owned()).into_fixate(ax, at)
   }
 
   fn transpose(&self, ax1 : usize, ax2 : usize) -> Self::Transpose {
-    self.to_().into_transpose(ax1, ax2)
+    ConstRef::new(self.0, self.1.to_owned()).into_transpose(ax1, ax2)
   }
 
   fn reverse(&self, ax : usize) -> Self::Reverse {
-    self.to_().into_reverse(ax)
+    ConstRef::new(self.0, self.1.to_owned()).into_reverse(ax)
   }
 
   fn diagonal(&self, ax1 : usize, ax2 : usize) -> Self::Diagonal {
-    self.to_().into_diagonal(ax1, ax2)
+    ConstRef::new(self.0, self.1.to_owned()).into_diagonal(ax1, ax2)
   }
 
   fn tile(&self, len : usize) -> Self::Tile {
-    self.to_().into_tile(len)
+    ConstRef::new(self.0, self.1.to_owned()).into_tile(len)
   }
 }
 

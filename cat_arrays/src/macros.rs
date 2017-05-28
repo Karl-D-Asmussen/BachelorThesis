@@ -82,6 +82,19 @@ macro_rules! fixate_check {
         panic!("given index out of bounds in {}::{}",
           stringify!($type), stringify!($funttc))
       }
+      if $self.rank() == 1 {
+        panic!("would create rank-0 array {}::{}",
+          stringify!($type), stringify!($funttc))
+      }
+    }
+  }
+}
+
+macro_rules! distinct_axes_check {
+  ($type:ident :: $func:ident,  $ax1:expr, $ax2:expr) => {
+    if $ax1 == $ax2 {
+      panic!("identical axis in {}::{}",
+        stringify!($type), stringify!($funttc))
     }
   }
 }
@@ -90,6 +103,7 @@ macro_rules! transpose_check {
   ($type:ident :: $func:ident, $self:ident, $ax1:expr, $ax2:expr) => {
     axis_valid_check!($type::$func, $self, $ax1);
     axis_valid_check!($type::$func, $self, $ax2);
+    distinct_axes_check!($type::$func, $ax1, $ax2);
   }
 }
 
@@ -97,8 +111,18 @@ macro_rules! diagonal_check {
   ($type:ident :: $func:ident, $self:ident, $ax1:expr, $ax2:expr) => {
     axis_valid_check!($type::$func, $self, $ax1);
     axis_valid_check!($type::$func, $self, $ax2);
+    distinct_axes_check!($type::$func, $ax1, $ax2);
     if *$self.shape().get(&Unit($ax1 as isize)) != *$self.shape().get(&Unit($ax2 as isize)) {
       panic!("given axes not equal in {}::{}", 
+          stringify!($type), stringify!($funttc))
+    }
+  }
+}
+
+macro_rules! tile_check {
+  ($type:ident :: $func:ident, $len:expr) => {
+    if $len == 0 {
+      panic!("given length is zero in {}::{}",
           stringify!($type), stringify!($funttc))
     }
   }

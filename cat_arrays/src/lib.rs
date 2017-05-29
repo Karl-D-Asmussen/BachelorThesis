@@ -15,5 +15,7 @@ pub mod iter;
 pub mod utils;
 pub mod traits;
 
+pub mod fold;
+
 #[cfg(test)]
 mod tests;

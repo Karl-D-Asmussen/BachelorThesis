@@ -1,7 +1,9 @@
 
 use traits::*;
+use std::cell::Cell;
 
-struct Map<'a, F, A, T, U>(F, &'a A) where A : ArrayLike<Entry = T>, F : FnMut(T) -> U;
+struct Map<'a, F, A, T, U>(F, Cell<Option<U>>, &'a A) where A : ArrayLike<Entry = T>, F : FnMut(T) -> U;
+struct Map2<'a, F, A, T, U, V>(F, &'a A) where A : ArrayLike<Entry = T>, F : FnMut(T, V) -> U;
 
 #[allow(unused_variables)]
 impl<'a, F, A, T, U> ArrayLike for Map<'a, F, A, T, U>

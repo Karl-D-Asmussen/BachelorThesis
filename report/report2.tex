@@ -1314,6 +1314,13 @@ Matrices are tried and true, easy to implement, and will form the basis of the c
 
 \chapter{Implementation}
 
+Code is available from the git repository
+\begin{center}
+\url{\ttfamily https://github.com/Karl-D-Asmussen/BachelorThesis/}.
+\end{center}
+In the sub-directory \texttt{cat\_arrays}, you will find a Cargo project;
+source files are in the \texttt{cat\_arrays/src} directory.
+
 \section{Rust}
 
 For the implementation I have chosen the Rust programming language. This
@@ -1352,8 +1359,8 @@ This design repeats with generic growable arrays and array slices, and many othe
 \section{Design Overview}
 
 I've chosen to call my library \texttt{cat\_array} for ``Categorical Arrays.''  It is made with the
-\texttt{cargo} packaging manager, and is available on GitHub\footnote{%TODO
-}. It is meant to showcase the power of the operations listed in Section~\ref{sec:array-operations},
+\texttt{cargo} project manager, and is available on GitHub.
+It is meant to showcase the power of the operations listed in Section~\ref{sec:array-operations},
 and isn't intended to be a realistic contender against more optimized code.
 
 However, in using Rust, we gain the benefit of Rust's main selling point: zero-cost abstractions.
@@ -1411,15 +1418,14 @@ Similarly, the dummy array type allows `stubbing out' the associated types which
 
 In this vein, several `simple' array types are given, developed in an interconnected manner: \texttt{Unit},
 \texttt{Const}, and an instance of array functionality is defined for every standard-library type that implements slicing
-(including but not limited to: string types, heap-allocated arrays, growable vectors, and slices.)
+(including but not limited to: string types, heap-allocated arrays, growable vectors, and slices.) Only then does
+it become viable to start implementing more advanced array types.
 
 The necessity of such simple array types is to fulfill the requirement of the shape and indexing operation: the
 shape of an array is always a rank-1 array, and the shape of a rank-1 array is always a singleton; similarly
 the indexing operation takes as an argument an array of coordinate components. With just these simple types defined
 it is already possible to hook arrays into the extensive \texttt{Iterator} functionality provided by the Rust
 standard library.
-
-\
 
 \section{Overview of the ArrayLike traits}
 
@@ -1554,7 +1560,8 @@ reference, but by \textit{value}. This means the function takes ownership of \te
 all responsibility of running the deconstructor.
 
 Traits like this will be particularly useful for a generalized reshape wrapper and generalized slice wrapper
-types, with which we would like to avoid nesting unnecessarily, since they compose.
+types, with which we would like to avoid nesting unnecessarily, since they naturally compose.
+
 
 \section{Main ArrayLike types}
 
@@ -1565,12 +1572,73 @@ There are several `main' types the library is centered around.
   \item[\texttt{Const<T>}] constant functions of any shape. Defined in \texttt{const.rs}.
   \item[\texttt{Map<'a, F, T, U, A>}] lazy map operation. Defined in \texttt{map.rs}.
   \item[\texttt{Fold<'a, F, T, U, A>}] lazy fold operation (in lieu of proper reduce.) Defined in \texttt{map.rs}.
-  \item[\texttt{OuterProd<'a, T, U, V, A, B>}] lazy outer-product operation.
-  \item[\texttt{GenReshape<T, A>}] radix-conversion-based wrapper to reshape any array.
-  \item[\texttt{GenSlice<T, A>}] homogenous-coordinate matrix-based wrapper to slice any array.
+  \item[\texttt{OuterProd<'a, T, U, V, A, B>}] lazy outer-product operation. Defined in \texttt{outer\_prod.rs}.
+  \item[\texttt{GenReshape<T, A>}] generic radix-conversion-based wrapper to reshape any array. Defined in \texttt{gen\_reshape.rs}.
+  \item[\texttt{GenSlice<T, A>}] generic homogenous-coordinate matrix-based wrapper to slice any array. Defined in \texttt{gen\_slice.rs}.
 \end{description}
 
-There is also a generic implementation for the `
+There is also a generic implementation for the built in arrays and slices, accomplished through
+implementing \texttt{ArrayLike} for every type that has the trait \texttt{Deref<Target = [T]>}.
+\texttt{Deref} is an operator-overloading trait, that allows for ``pointer-like'' traits to
+work --- this is used extensively in Rust to implement smart-pointers and array-like types such
+as growable arrays.
+
+The types \texttt{Unit}, \texttt{Const}, \texttt{GenReshape}, and \texttt{GenSlice} all come in
+three varieties: basic, -\texttt{Ref}, and -\texttt{MutRef} signfying the concepts of owned types,
+references, and mutable references inherent in Rust. \texttt{Unit} owns its single value and will
+for most operations  perform a \texttt{clone} operation that has the potential to do heap allocation.
+\texttt{UnitRef} however, contains a reference, and references are essentially pointers and therefore
+bit-copyable. \texttt{UnitMutRef} also implements \texttt{ArrayLikeMut}.
+
+The types \texttt{Const} and \texttt{GenReshape}/\texttt{GenSlice} all contain a few heap-allocated
+structures to designate e.g. their shape, but the amount is negligible.
+
+The \texttt{GenReshape}/\texttt{GenSlice} types are designedd to work with almost any type, and
+provide a `quick fix' way of implementing \texttt{ArrayLike}
+
+\section{Lack of HKT, Excessive use of \texttt{Clone}}
+
+Rust lacks higher-kinded types. It is in the deveopment pipeline to one day support both higher-kinded
+types and \(\Pi\)-types, but at present, both of these are a detriment to the efforts of this implementation.
+
+In particular, a common conflict is the following: given a pair of types such as \texttt{Unit<T>} and
+\texttt{UnitRef<'a, T>} we find outselves in want of a way to implement e.g. \texttt{ArrayLike::flat}
+in such a manner that it returns the reference type. This is, however, impossible.
+
+The \texttt{flat} operation has (and indeed it is difficult to concieve of how else to implement it) the
+signature:
+
+\begin{lstlisting}
+  fn flat(&self) -> Self::Flat;
+\end{lstlisting}
+
+This hides the lifetime of the reference on \texttt{self} by way of lifetime elision:
+
+\begin{lstlisting}
+  fn flat<'a>(&'a self) -> Self::Flat;
+\end{lstlisting}
+
+So, what we wish to do is supply the associated type \texttt{ArrayLike::Flat} as \texttt{UnitRef} like
+so:
+
+\begin{lstlisting}
+  type Flat = UnitRef<'a, Self::Entry>;
+  fn flat<'a>(&'a self) -> Self::Flat;
+\end{lstlisting}
+
+But here the problem arises: the lifetime \texttt{'a} is not in scope at the point where we declare
+\texttt{Self::Flat}. Here it \emph{would} be prudent to supply an associated type \emph{constructor}
+rather than merely a type:
+
+\begin{lstlisting}
+  type Flat<'a> = UnitRef<'a, Self::Entry>;
+  fn flat<'a>(&'a self) -> Self::Flat<'a>;
+\end{lstlisting}
+
+But alas, this is impossible. Should it some day become possible, this entire library could be
+rewritten to become potentially many times more efficient.
+
+\section{Returning References in Lazy Arrays}
 
 \vfill
 \begin{center}\itshape End report.\end{center}

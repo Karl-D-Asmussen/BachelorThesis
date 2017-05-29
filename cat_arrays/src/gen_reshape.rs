@@ -9,14 +9,14 @@ pub struct GenReshape<T, A : Clone>(A, Vec<usize>, usize) where A : ArrayLike<En
 pub struct GenReshapeRef<'a, T, A : 'a>(&'a A, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
 pub struct GenReshapeMutRef<'a, T, A : 'a>(&'a mut A, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
 
-impl<T, A : Clone> GenReshape<T, A> where A : ArrayLike<Entry=T> {
+impl<T : Clone, A : Clone> GenReshape<T, A> where A : ArrayLike<Entry=T> {
     pub fn new(arr : A, shape : Vec<usize>)  -> Self{
         let len = shape.iter().fold(1, |a, b| a * b);
         GenReshape(arr, shape, len)
     }
 }
 
-impl<T, A : Clone> Clone for GenReshape<T, A> where A : ArrayLike<Entry = T> {
+impl<T : Clone, A : Clone> Clone for GenReshape<T, A> where A : ArrayLike<Entry = T> {
     fn clone(&self) -> Self {
         GenReshape(self.0.clone(), self.1.clone(), self.2)
     }
@@ -37,7 +37,7 @@ impl<'a, T, A : 'a> GenReshapeMutRef<'a, T, A> where A : ArrayLike<Entry=T> + Ar
 }
 
 #[allow(unused_variables)]
-impl<T, A> ArrayLike for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone {
+impl<T : Clone, A> ArrayLike for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone {
   type Entry = T;
   type Shape = Vec<usize>;
   type Flat = GenReshape<T, A>;
@@ -79,7 +79,7 @@ impl<T, A> ArrayLike for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone
   fn tile(&self, len : usize) -> Self::Tile { unimplemented!() }
 }
 
-impl<T, A> IntoFlat for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone {
+impl<T : Clone, A> IntoFlat for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone {
   type To = Self;
   fn into_flat(mut self) -> Self::To {
     let len = self.len();
@@ -89,7 +89,7 @@ impl<T, A> IntoFlat for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone 
   }
 }
 
-impl<T, A> IntoReshape for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone {
+impl<T : Clone, A> IntoReshape for GenReshape<T, A> where A : ArrayLike<Entry = T> + Clone {
   type To = Self;
   fn into_reshape<I>(mut self, shape : &I) -> Self::To 
   where I : ArrayLike<Entry = usize> {

@@ -1,0 +1,65 @@
+
+use traits::*;
+use iter::*;
+use dummy::*;
+use gen_reshape::*;
+
+#[derive(Clone)]
+// column major order
+struct Mat(usize, usize, Vec<Vec<isize>>, Vec<isize>);
+
+#[derive(Clone)]
+pub struct GenSlice<T, A : Clone>(A, Mat, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
+
+#[allow(unused_variables)]
+impl<A : Clone, T : Clone> ArrayLike for GenSlice<T, A> where A : ArrayLike<Entry = T> {
+  type Entry = T;
+  type Shape = Vec<usize>;
+  type Flat = GenReshape<T, GenSlice<T, A>>;
+  type Reshape = GenReshape<T, GenSlice<T, A>>;
+  type Slice = DummyArray<T>;
+  type Fixate = DummyArray<T>;
+  type Transpose = DummyArray<T>;
+  type Reverse = DummyArray<T>;
+  type Diagonal = DummyArray<T>;
+  type Tile = DummyArray<T>;
+  
+  fn rank(&self) -> usize { self.2.len() }
+  fn len(&self) -> usize { self.3 }
+  fn shape(&self) -> &Self::Shape { &self.2 }
+
+  fn get<I>(&self, coord : &I) -> &Self::Entry
+  where I : ArrayLike<Entry = isize> {
+    get_set_coord_check!(GenSlice::get, self, coord);
+    let mut new_coord = Vec::with_capacity(self.1 .3.len());
+    
+    new_coord.extend(
+      self.1 .2.iter()
+               .map(|row|
+                row.iter()
+                   .zip(FlatIter::new(coord))
+                   .map(|ab| ab.0 * *ab.1)
+                   .fold(0, |a, b| a + b)
+              ).zip(self.1 .3.iter())
+               .map(|ab| ab.0 + ab.1)
+    );
+
+    self.0.get(&new_coord)
+  }
+
+  fn flat(&self) -> Self::Flat { 
+    GenReshape::new(self.clone(), vec![self.len()])
+  }
+  fn reshape<I>(&self, shape : &I) -> Self::Reshape
+  where I : ArrayLike<Entry = usize> { 
+    reshape_check!(GenSlice::reshape, self, shape);
+    GenReshape::new(self.clone(), FlatIter::new(shape).map(|a| *a).collect())
+  }
+  fn slice<I>(&self, cuboid : &I) -> Self::Slice
+  where I : ArrayLike<Entry = (isize, Option<isize>, isize)> { unimplemented!() }
+  fn fixate(&self, ax : usize, at : isize) -> Self::Fixate { unimplemented!() }
+  fn transpose(&self, ax1 : usize, ax2 : usize) -> Self::Transpose { unimplemented!() }
+  fn reverse(&self, ax1 : usize) -> Self::Reverse { unimplemented!() }
+  fn diagonal(&self, ax1 : usize, ax2 : usize) -> Self::Diagonal { unimplemented!() }
+  fn tile(&self, len : usize) -> Self::Tile { unimplemented!() }
+}

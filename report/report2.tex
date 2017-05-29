@@ -1409,9 +1409,8 @@ in Rust, causing every array-related call to cause an execution-thread panic.
 
 Similarly, the dummy array type allows `stubbing out' the associated types which have not yet been determined.
 
-In this vein, several `simple' array types are given, developed in an interconnected manner: \texttt{Void},
-\texttt{Unit}, \texttt{Same}, \texttt{Singleton}, \texttt{Singletile}, and \texttt{Empty}. Additionally
-an instance of array functionality is defined for every standard-library type that implements slicing
+In this vein, several `simple' array types are given, developed in an interconnected manner: \texttt{Unit},
+\texttt{Const}, and an instance of array functionality is defined for every standard-library type that implements slicing
 (including but not limited to: string types, heap-allocated arrays, growable vectors, and slices.)
 
 The necessity of such simple array types is to fulfill the requirement of the shape and indexing operation: the
@@ -1419,6 +1418,8 @@ shape of an array is always a rank-1 array, and the shape of a rank-1 array is a
 the indexing operation takes as an argument an array of coordinate components. With just these simple types defined
 it is already possible to hook arrays into the extensive \texttt{Iterator} functionality provided by the Rust
 standard library.
+
+\
 
 \section{Overview of the ArrayLike traits}
 
@@ -1555,9 +1556,21 @@ all responsibility of running the deconstructor.
 Traits like this will be particularly useful for a generalized reshape wrapper and generalized slice wrapper
 types, with which we would like to avoid nesting unnecessarily, since they compose.
 
-\section{Reference implementation: \texttt{DummyArray}}
+\section{Main ArrayLike types}
 
+There are several `main' types the library is centered around.
+\begin{description}
+  \item[\texttt{DummyArray<T>}] a white-hole implementation. Defined in \texttt{dummy.rs}.
+  \item[\texttt{Unit<T>}] array of shape \([1]\). Defined in \texttt{unit.rs}.
+  \item[\texttt{Const<T>}] constant functions of any shape. Defined in \texttt{const.rs}.
+  \item[\texttt{Map<'a, F, T, U, A>}] lazy map operation. Defined in \texttt{map.rs}.
+  \item[\texttt{Fold<'a, F, T, U, A>}] lazy fold operation (in lieu of proper reduce.) Defined in \texttt{map.rs}.
+  \item[\texttt{OuterProd<'a, T, U, V, A, B>}] lazy outer-product operation.
+  \item[\texttt{GenReshape<T, A>}] radix-conversion-based wrapper to reshape any array.
+  \item[\texttt{GenSlice<T, A>}] homogenous-coordinate matrix-based wrapper to slice any array.
+\end{description}
 
+There is also a generic implementation for the `
 
 \vfill
 \begin{center}\itshape End report.\end{center}
@@ -1570,7 +1583,8 @@ types, with which we would like to avoid nesting unnecessarily, since they compo
 
 \section{Notation guide}
 
-\begin{description}[align=right,labelwidth=7em]
+Array specific:
+\begin{description}[align=left,labelwidth=7em]
   \item[\(\sharp A\)] Shape of an array (Definition~\ref{def:shape})
   \item[\(\flat A\)] Flat/in-order traversal of an array (Definition~\ref{def:flat})
   \item[\(\varrho(A, \rho)\)] Reshape of array (Definition~\ref{def:reshape})
@@ -1580,6 +1594,11 @@ types, with which we would like to avoid nesting unnecessarily, since they compo
   \item[\(\diag_{x, y} A\)] Diagnoally traverse an array (Definition~\ref{def:diagonal})
   \item[\(\reduce^k_{(S, \oplus, \epsilon)} A\)] Reducing an array by a monoid (Definition~\ref{def:reduce})
   \item[\(A \oprodby f B\)] Outer product of arrays (Definition~\ref{def:outer-product})
+\end{description}
+
+Generic:
+\begin{description}
+  \item[\(\sum f\)] implicitly \(sum_{i=0}^{k} f(i)\) where applicable (Remark~\ref{rem:quant-elision})
 \end{description}
 
 \vfill

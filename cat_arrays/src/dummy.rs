@@ -1,16 +1,18 @@
 
+#![allow(unused_variables)]
+
 use traits::*;
 use std::marker::PhantomData;
 
 pub struct DummyArray<T>(pub PhantomData<T>);
 
 impl<T> DummyArray<T> {
+    #[allow(dead_code)]
     fn new() -> Self {
         DummyArray(PhantomData)
     }
 }
 
-#[allow(unused_variables)]
 impl<T> ArrayLike for DummyArray<T> {
   type Entry = T;
   type Shape = DummyArray<usize>;
@@ -41,7 +43,6 @@ impl<T> ArrayLike for DummyArray<T> {
   fn tile(&self, len : usize) -> Self::Tile { unimplemented!() }
 }
 
-#[allow(unused_variables)]
 impl<T> ArrayLikeMut for DummyArray<T> {
   type FlatMut = DummyArray<T>;
   type ReshapeMut = DummyArray<T>;

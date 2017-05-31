@@ -1,7 +1,7 @@
 \documentclass{DIKU-report-variant}
 
 \usepackage[titelside, nat, en, farve]{ku-forside}
-\opgave{Bachelorproject}
+\opgave{Bacherlor Thesis}
 \forfatter{Karl D. Asmussen}
 \titel{Multidimensional Arrays}
 \undertitel{Formally Speficied by Shape Description and Sliced with Affine Functions}
@@ -40,7 +40,7 @@
 }
 \lstset{ 
   backgroundcolor=\color{white},  
-  basicstyle=\footnotesize\ttfamily,      
+  basicstyle=\ttfamily,      
   breakatwhitespace=false,       
   breaklines=true,            
   captionpos=b,              
@@ -48,7 +48,7 @@
   keepspaces=true,
   keywordstyle=\bfseries,
   language=Rust,
-  numbers=left,                    
+  numbers=none,                    
   numbersep=5pt,                  
   numberstyle=\tiny\ttfamily, 
   rulecolor=\color{black}, 
@@ -59,6 +59,7 @@
   stringstyle=\color{black!70}, 
   tabsize=2,
   title=\lstname,
+  belowskip=-1.5em,
 }
 
 \usepackage{tikz}
@@ -121,15 +122,8 @@
   Data structure, \(d\)-dimensional array, semantics, numerical computing, Rust, NumPy
 \end{keywords}
 
-\vfill
-
-\paragraph{A disclaimer:} Writing this bachelor's thesis has taken nearly a year from
-initial conception to final product; sections have been written out of order, and terminology
-may be \textsl{slightly} inconsistent. There simply isn't time enough to correct this.
-
 \setcounter{tocdepth}{2}
 \tableofcontents
-
 
 \chapter{Formalization}
 
@@ -499,21 +493,16 @@ free groups of some order, with additional equalities to obtain the desired stru
   The arrows are as follows:
   \begin{itemize}
     \item For every object \(o\)
-      there is an arrow \(a\) from it, to the single-element sequence
-      that is the product of its elements \(a : o \to \prod o\)
-    \item For every object \(o : \Nat_k \to \Nat\),
-      there is an arrow \(a\) from it, to the single-element sequence
+      there is an arrow \(\flat\) from it, to the single-element sequence
+                  that is the product of its elements \(\flat : o \to \left[ \prod o \right]\)
+    \item For every object \(o\) which is a sequence of \(k\) elements,
+      there is an arrow \(\sharp\) from it, to the single-element sequence
       that contains as its sole element, the number of elements in \(o\), in
-      other words, \(a : o \to k\).
-  \end{itemize}
-  These two schema correspond to the operations \(\flat\) and \(\sharp\), respectively.
-
-  \begin{itemize}
+      other words, \(a : o \to [k]\).
     \item For every pair of objects \(o, o'\), which have the same product
-      \(\prod o = \prod o'\), an isomorphic arrow \(a\) connects them
-      \( a : o \to o'\), \(a^{-1} : o' \to o\).
+      \(\prod o = \prod o'\), an isomorphic arrow \(\varrho\) connects them
+      \( \varrho : o \to o'\), \(\varrho^{-1} : o' \to o\).
   \end{itemize}
-  This corresponds to the \(\varrho\) partial function. 
 
   There is an additional commutation which is a reflection of the
   property that \(\flat\) and \(\varrho\) are equivalent.
@@ -1316,7 +1305,7 @@ Matrices are tried and true, easy to implement, and will form the basis of the c
 
 Code is available from the git repository
 \begin{center}
-\url{\ttfamily https://github.com/Karl-D-Asmussen/BachelorThesis/}.
+\url{https://github.com/Karl-D-Asmussen/BachelorThesis/}.
 \end{center}
 In the sub-directory \texttt{cat\_arrays}, you will find a Cargo project;
 source files are in the \texttt{cat\_arrays/src} directory.
@@ -1638,7 +1627,22 @@ rather than merely a type:
 But alas, this is impossible. Should it some day become possible, this entire library could be
 rewritten to become potentially many times more efficient.
 
+It is therefore recommended to eliminate copying by using the \texttt{*Ref<'a, ...>} family of
+types whenever possible --- these only perform a pointer-copy of the reference to the underlying
+array.
+
 \section{Returning References in Lazy Arrays}
+
+The problem with lazy types is that the \texttt{ArrayLike::get} method is required to return
+a reference type. Computing the desired result within the function body and attempting to return
+a reference to it is disallowed by the Rust compiler, as the required data is almost always allocated
+on the called function's stack frame --- a pointer thereto would be rendered dangling as soon as the
+function returned.
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{References}
+\printbibliography
 
 \vfill
 \begin{center}\itshape End report.\end{center}
@@ -1648,6 +1652,7 @@ rewritten to become potentially many times more efficient.
 \renewcommand\thesection{\Alph{section}}
 \phantomsection
 \addcontentsline{toc}{chapter}{Appendices}
+
 
 \section{Notation guide}
 
@@ -1669,13 +1674,86 @@ Generic:
   \item[\(\sum f\)] implicitly \(sum_{i=0}^{k} f(i)\) where applicable (Remark~\ref{rem:quant-elision})
 \end{description}
 
+\section{Code}
+\lstset{ 
+  backgroundcolor=\color{white},  
+  basicstyle=\ttfamily,      
+  breakatwhitespace=false,       
+  breaklines=true,            
+  captionpos=b,              
+  commentstyle=\color{black!50}, 
+  keepspaces=true,
+  keywordstyle=\bfseries,
+  language=Rust,
+  numbers=left,                   
+  numbersep=5pt,                  
+  numberstyle=\tiny\ttfamily, 
+  rulecolor=\color{black}, 
+  showspaces=false,       
+  showstringspaces=false,
+  showtabs=false,       
+  stepnumber=1,
+  stringstyle=\color{black!70}, 
+  tabsize=2,
+  title=\lstname,
+  belowskip=0em,
+}
+
+Total lines of code in the project come out in excess of 1500. Be warned, this appendix
+is very long.
+
+Every Rust project is usually centered around a single file that names the
+other code files:
+\lstinputlisting{../cat_arrays/src/lib.rs}
+
+Core trait definitions:
+\lstinputlisting{../cat_arrays/src/traits.rs}
+
+The macro system exposed directly in rust
+source code is hygeinic and quite limited in scope. Macros accomplished by add-on compiler modules
+(called procedural macros) are of course turing complete.
+I use macros to eliminate some boilerplate:
+\lstinputlisting{../cat_arrays/src/macros.rs}
+
+A utility type to enable rank-1 arrays to integrate with Rust's iterator libraries:
+\lstinputlisting{../cat_arrays/src/iter.rs}
+
+Utility functions to aid in computing e.g. array indexes:
+\lstinputlisting{../cat_arrays/src/utils.rs}
+
+A dummy implementation of the array traits:
+\lstinputlisting{../cat_arrays/src/dummy.rs}
+
+The most basic array type, the singleton. Notice here the technique of
+re-casting using \texttt{std::mem::transmute} in situations where the lifetimes
+don't align but we know it is safe:
+\lstinputlisting{../cat_arrays/src/unit.rs}
+
+The constant function as an array type: Notice the similarity in
+structure with \texttt{Unit} and the use of a \texttt{Vec<usize>} as shape.
+\lstinputlisting{../cat_arrays/src/constant.rs}
+
+An implementation for built-in types supporting slices, allowing \texttt{Vec<usize>}
+to be used as an array for shape descriptions.
+\lstinputlisting{../cat_arrays/src/constant.rs}
+
+Generic reshape wrappers:
+\lstinputlisting{../cat_arrays/src/gen_reshape.rs}
+
+Generic slice wrappers:
+\lstinputlisting{../cat_arrays/src/gen_slice.rs}
+
+Lazy Map implementation:
+\lstinputlisting{../cat_arrays/src/map.rs}
+
+Lazy Fold implementation:
+\lstinputlisting{../cat_arrays/src/fold.rs}
+
+
 \vfill
 \begin{center}\itshape End appendices.\end{center}
 \clearpage
 
-\phantomsection
-\addcontentsline{toc}{chapter}{References}
-\printbibliography
 %\listoftables
 %\listoffigures
 %\printindex

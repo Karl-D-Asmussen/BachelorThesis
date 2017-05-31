@@ -127,3 +127,24 @@ macro_rules! tile_check {
     }
   }
 }
+
+macro_rules! S {
+    ( , ) => { (0, None, 1) } ;
+    ( ,; ) => { (0, None, 1) } ;
+    ( ,, ) => { (0, Some(-1), 1) } ;
+    ( ,,; ) => { (0, Some(-1), 1) } ;
+    ($lo:expr , ) => { ($lo, None, 1) } ;
+    ($lo:expr ,, ) => { ($lo, Some(-1), 1) } ;
+    (, $hi:expr) => { (0, Some($hi), 1) } ;
+    (,, $hi:expr) => { (0, Some($hi+1), 1) } ;
+    ( ; $st:expr) => { (0, None, $st) } ;
+    (, ; $st:expr) => { (0, Some(-1), $st) } ;
+    ($lo:expr , $hi:expr ) => { ($lo, Some($hi), 1) } ;
+    ($lo:expr ,, $hi:expr ) => { ($lo, Some($hi+1), 1) } ;
+    ($lo:expr , ; $st:expr) => { ($lo, None, $st) } ;
+    ($lo:expr ,, ; $st:expr) => { ($lo, Some(-1), $st) } ;
+    (, $hi:expr ; $st:expr) => { (0, Some($hi), $st) } ;
+    (,, $hi:expr ; $st:expr) => { (0, Some($hi+1), $st) } ;
+    ($lo:expr , $hi:expr ; $st:expr) => { ($lo, Some($hi), $st) } ;
+    ($lo:expr ,, $hi:expr ; $st:expr) => { ($lo, Some($hi+1), $st) } ;
+}

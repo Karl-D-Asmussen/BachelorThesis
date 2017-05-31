@@ -8,8 +8,40 @@ use gen_reshape::*;
 // column major order
 struct Mat(usize, usize, Vec<Vec<isize>>, Vec<isize>);
 
+impl Mat {
+    fn new(arr : &[(isize, Option<isize>, isize)]) -> Self {
+        let mut rows = Vec::with_capacity(arr.len());
+        let mut cons = Vec::with_capacity(arr.len());
+        for (lhs, n) in arr.zip(0 ..) {
+            cons.push(lhs.0);
+            let mut row = Vec::with_capacity(arr.len());
+            for i in 0 .. arr.len() {
+                row.push( if n == i { lhs.2 } else { 0 } )
+            }
+        }
+    }
+
+    fn merge(mut self, row1 : usize, row2 : usize) -> Self {
+        for v in &mut self.2 {
+            v[row1] += v[row2];
+            v.remove(row2);
+        }
+        self
+    }
+
+    fn scale(mut self, row : &[usize]) -> Self {
+        for v in &mut self.2 {
+            v.iter_mut().rev().zip(
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct GenSlice<T, A : Clone>(A, Mat, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
+
+pub struct GenSliceRef<'a, T, A : 'a>(&'a A, Mat, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
+
+pub struct GenSliceMutRef<'a, T, A : 'a>(&'a mut A, Mat, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
 
 #[allow(unused_variables)]
 impl<A : Clone, T : Clone> ArrayLike for GenSlice<T, A> where A : ArrayLike<Entry = T> {

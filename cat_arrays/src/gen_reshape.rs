@@ -5,7 +5,8 @@ use utils::*;
 use dummy::*;
 use std::mem::transmute;
 
-pub struct GenReshape<T, A : Clone>(A, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
+#[derive(Clone)]
+pub struct GenReshape<T : Clone, A : Clone>(A, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
 pub struct GenReshapeRef<'a, T, A : 'a>(&'a A, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
 pub struct GenReshapeMutRef<'a, T, A : 'a>(&'a mut A, Vec<usize>, usize) where A : ArrayLike<Entry = T>;
 
@@ -13,12 +14,6 @@ impl<T : Clone, A : Clone> GenReshape<T, A> where A : ArrayLike<Entry=T> {
     pub fn new(arr : A, shape : Vec<usize>)  -> Self{
         let len = shape.iter().fold(1, |a, b| a * b);
         GenReshape(arr, shape, len)
-    }
-}
-
-impl<T : Clone, A : Clone> Clone for GenReshape<T, A> where A : ArrayLike<Entry = T> {
-    fn clone(&self) -> Self {
-        GenReshape(self.0.clone(), self.1.clone(), self.2)
     }
 }
 

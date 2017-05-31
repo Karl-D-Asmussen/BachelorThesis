@@ -5,34 +5,40 @@ use dummy::*;
 use gen_reshape::*;
 
 #[derive(Clone)]
-// column major order
-struct Mat(usize, usize, Vec<Vec<isize>>, Vec<isize>);
+struct Mat(Vec<Vec<isize>>, Vec<isize>);
 
 impl Mat {
     fn new(arr : &[(isize, Option<isize>, isize)]) -> Self {
         let mut rows = Vec::with_capacity(arr.len());
         let mut cons = Vec::with_capacity(arr.len());
-        for (lhs, n) in arr.zip(0 ..) {
+        for (lhs, n) in arr.iter().zip(0 ..) {
             cons.push(lhs.0);
             let mut row = Vec::with_capacity(arr.len());
             for i in 0 .. arr.len() {
                 row.push( if n == i { lhs.2 } else { 0 } )
             }
+            rows.push(row)
         }
+        Mat(rows, cons)
     }
 
     fn merge(mut self, row1 : usize, row2 : usize) -> Self {
-        for v in &mut self.2 {
+        for v in &mut self.0 {
             v[row1] += v[row2];
             v.remove(row2);
         }
         self
     }
 
-    fn scale(mut self, row : &[usize]) -> Self {
-        for v in &mut self.2 {
-            v.iter_mut().rev().zip(
+    fn scale(mut self, shape : &[usize]) -> Self {
+        for v in &mut self.0 {
+            let mut mul = 1isize;
+            for (a, b) in v.iter_mut().rev().zip(row.iter()) {
+                *a *= mul;
+                mul *= *b as isize;
+            }
         }
+        self
     }
 }
 
@@ -63,16 +69,16 @@ impl<A : Clone, T : Clone> ArrayLike for GenSlice<T, A> where A : ArrayLike<Entr
   fn get<I>(&self, coord : &I) -> &Self::Entry
   where I : ArrayLike<Entry = isize> {
     get_set_coord_check!(GenSlice::get, self, coord);
-    let mut new_coord = Vec::with_capacity(self.1 .3.len());
+    let mut new_coord = Vec::with_capacity(self.1 .0.len());
     
     new_coord.extend(
-      self.1 .2.iter()
+      self.1 .0.iter()
                .map(|row|
                 row.iter()
                    .zip(FlatIter::new(coord))
                    .map(|ab| ab.0 * *ab.1)
                    .fold(0, |a, b| a + b)
-              ).zip(self.1 .3.iter())
+              ).zip(self.1 .1.iter())
                .map(|ab| ab.0 + ab.1)
     );
 

@@ -2,11 +2,12 @@
 use traits::*;
 use std::cell::Cell;
 
-struct Map<'a, F, A, T, U>(F, Cell<Option<U>>, &'a A) where A : ArrayLike<Entry = T>, F : FnMut(T) -> U;
-struct Map2<'a, F, A, T, U, V>(F, &'a A) where A : ArrayLike<Entry = T>, F : FnMut(T, V) -> U;
+struct Map<'a, F, A : 'a, T, U>(F, Cell<Option<U>>, &'a A) where A : ArrayLike<Entry = T>, F : FnMut(&'a T) -> U;
+struct Map2<'a, F, A : 'a, B: 'a, T, U, V>(F, &'a A)
+where A : ArrayLike<Entry = T>, A : ArrayLike<Entry = U>, F : FnMut(T, U) -> V;
 
 #[allow(unused_variables)]
-impl<'a, F, A, T, U> ArrayLike for Map<'a, F, A, T, U>
+impl<'a, F, A : 'a, T, U> ArrayLike for Map<'a, F, A, T, U>
 where A : ArrayLike<Entry = T>, F : FnMut(T) -> U {
   type Entry = U;
   type Shape = A::Shape;
@@ -26,7 +27,7 @@ where A : ArrayLike<Entry = T>, F : FnMut(T) -> U {
   fn get<I>(&self, coord : &I) -> &Self::Entry
   where I : ArrayLike<Entry = isize> {
     get_set_coord_check!(Map::get, self, coord);
-    self.0(self.1.get(coord))
+    &self.0(self.1.get(coord))
   }
 
   fn flat(&self) -> Self::Flat { unimplemented!() }

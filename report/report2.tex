@@ -275,7 +275,7 @@ models, and that is what we will explore in this chapter.
 \end{definition}
 \begin{observation}
   \label{ob:shape}
-  Som observations on Definition~\ref{def:shape}:
+  Some observations on Definition~\ref{def:shape}:
   \begin{itemize}
     \item The shape of the shape is the rank, \(\sharp \sharp A = d\).
     \item The shape of the shape of the shape is always 1, meaning \(\sharp \sharp \sharp A = [1]\).
@@ -398,34 +398,6 @@ models, and that is what we will explore in this chapter.
   \(\flat A = \flat B\). This of course implies reshape-compatibility.
 \end{definition}
 
-\begin{theorem}
-  Equality of the traversals
-  \(\flat A = \flat B\) does not imply the same holds true
-  for the reverse traversals \(\tlaf A = \tlaf B\).
-
-  We prove by presenting a counter-example.
-\end{theorem}
-\begin{proof}
-  Consider the arrays
-  \begin{align*}
-    A =
-    \begin{bmatrix}
-      1 & 2 & 3 \\
-      4 & 5 & 6
-    \end{bmatrix}
-    \quad\text{and}\quad
-    B =
-    \begin{bmatrix}
-      1 & 2 \\
-      3 & 4 \\
-      5 & 6
-    \end{bmatrix}
-  \end{align*}
-  Both have the flat traversal \(\flat A = \flat B = [1\; 2\; 3\; 4\; 5\; 6]\),
-  but the reverse traversals are \(\tlaf A = [1\; 4\; 2\; 5\; 3\; 6]\) and
-  \(\tlaf B = [1\; 3\; 5\; 2\; 4\; 6]\).
-\end{proof}
-
 \begin{definition}
   \label{def:reshape}
   Given an array \(A\) and a reshape-compatible shape \(\rho\), meaning \(\prod \sharp A = \prod\rho\),
@@ -441,10 +413,10 @@ models, and that is what we will explore in this chapter.
   Some observations on Definition~\ref{def:reshape}:
   \begin{itemize}
     \item The reshape operation is a partial \emph{function}. Given an array \(A\) and a compatible
-      shape \(\rho\), there is only one possible array \(B\) that fullfills
+      shape \(\rho\), there is only one possible array \(B\) that fulfills
       both \(\sharp B = \rho\) and \(\flat A = \flat B\).
-    \item The reshape operation is a \emph{partial} function, in that it is undefined for non-compatible
-      shapes.
+    \item The reshape operation is a \emph{partial} function, in that it is defined exactly when the
+      shape \(\rho\) is reshape compatible with \(\sharp A\) and undefined otherwise.
     \item Reshaping to one axis is the same as flattening, \(\varrho(A, \sharp \flat A) = \flat A\).
   \end{itemize}
 \end{observation}
@@ -484,7 +456,6 @@ free groups of some order, with additional equalities to obtain the desired stru
 
 \begin{definition}
   \label{def:category-of-shapes}
-  % TODO: Variable name salad
   We define the category \(\Arr\SFR\) as follows:
 
   The objects are finite sequences (rank-1 arrays)
@@ -494,14 +465,14 @@ free groups of some order, with additional equalities to obtain the desired stru
   \begin{itemize}
     \item For every object \(o\)
       there is an arrow \(\flat\) from it, to the single-element sequence
-                  that is the product of its elements \(\flat : o \to \left[ \prod o \right]\)
-    \item For every object \(o\) which is a sequence of \(k\) elements,
+      that is the product of its elements \(\flat : o \to \big[ \prod o \big]\)
+    \item For every sequence \(o\) of \(k\) elements,
       there is an arrow \(\sharp\) from it, to the single-element sequence
       that contains as its sole element, the number of elements in \(o\), in
-      other words, \(a : o \to [k]\).
-    \item For every pair of objects \(o, o'\), which have the same product
-      \(\prod o = \prod o'\), an isomorphic arrow \(\varrho\) connects them
-      \( \varrho : o \to o'\), \(\varrho^{-1} : o' \to o\).
+      other words, \(\sharp : o \to [k]\).
+    \item For every pair of sequences \(o, \hat o\), which have the same product
+      \(\prod o = \prod \hat o\), an isomorphic arrow \(\varrho\) connects them
+      \( \varrho : o \to \hat o\), \(\varrho^{-1} : \hat o \to o\).
   \end{itemize}
 
   There is an additional commutation which is a reflection of the
@@ -907,7 +878,7 @@ We can now properly define the category of arrays.
 
 \begin{observation}
   \label{ob:category-of-arrays}
-
+  Some observations on Definition~\ref{def:category-of-arrays}:
   \begin{itemize}
     \item In the category of arrays, the products are implicitly given. Since th domains
       of all arrays are (usually) Cartesian products already, an array with its codomain being
@@ -1164,7 +1135,7 @@ of the upper bound of the two former dimensions, and so on. This is exactly like
 the least significant digit by 1, the second-to-least by \(10 = 1\times 10\), the next one by
 \(100 = 1\times 10\times 10\). 
 
-One complication is that we in our defintion of the flat traversal \(\flat A\) prefer the last index
+One complication is that we in our definition of the flat traversal \(\flat A\) prefer the last index
 to be the least significant. Index computation in a cuboid \(\Nat_{<k_0} \times \cdots \times \Nat_{<k_{d-1}}\) is
 thus given by the function
 \begin{align*}
@@ -1195,7 +1166,7 @@ representable in memory, and a linear function which is easily computable:
   We shall call the linear function the flat radix.
 \end{theorem}
 \begin{proof}
-  As outlined above.
+  As outlined in the section above.
 \end{proof}
 
 \section{Preservation of Origin Index}
@@ -1573,7 +1544,7 @@ work --- this is used extensively in Rust to implement smart-pointers and array-
 as growable arrays.
 
 The types \texttt{Unit}, \texttt{Const}, \texttt{GenReshape}, and \texttt{GenSlice} all come in
-three varieties: basic, -\texttt{Ref}, and -\texttt{MutRef} signfying the concepts of owned types,
+three varieties: basic, -\texttt{Ref}, and -\texttt{MutRef} signifying the concepts of owned types,
 references, and mutable references inherent in Rust. \texttt{Unit} owns its single value and will
 for most operations  perform a \texttt{clone} operation that has the potential to do heap allocation.
 \texttt{UnitRef} however, contains a reference, and references are essentially pointers and therefore
@@ -1582,19 +1553,19 @@ bit-copyable. \texttt{UnitMutRef} also implements \texttt{ArrayLikeMut}.
 The types \texttt{Const} and \texttt{GenReshape}/\texttt{GenSlice} all contain a few heap-allocated
 structures to designate e.g. their shape, but the amount is negligible.
 
-The \texttt{GenReshape}/\texttt{GenSlice} types are designedd to work with almost any type, and
+The \texttt{GenReshape}/\texttt{GenSlice} types are designed to work with almost any type, and
 provide a `quick fix' way of implementing \texttt{ArrayLike}
 
 \section{Lack of HKT, Excessive use of \texttt{Clone}}
 
-Rust lacks higher-kinded types. It is in the deveopment pipeline to one day support both higher-kinded
+Rust lacks higher-kinded types. It is in the development pipeline to one day support both higher-kinded
 types and \(\Pi\)-types, but at present, both of these are a detriment to the efforts of this implementation.
 
 In particular, a common conflict is the following: given a pair of types such as \texttt{Unit<T>} and
-\texttt{UnitRef<'a, T>} we find outselves in want of a way to implement e.g. \texttt{ArrayLike::flat}
+\texttt{UnitRef<'a, T>} we find ourselves in want of a way to implement e.g. \texttt{ArrayLike::flat}
 in such a manner that it returns the reference type. This is, however, impossible.
 
-The \texttt{flat} operation has (and indeed it is difficult to concieve of how else to implement it) the
+The \texttt{flat} operation has (and indeed it is difficult to conceive of how else to implement it) the
 signature:
 
 \begin{lstlisting}
@@ -1631,13 +1602,223 @@ It is therefore recommended to eliminate copying by using the \texttt{*Ref<'a, .
 types whenever possible --- these only perform a pointer-copy of the reference to the underlying
 array.
 
-\section{Returning References in Lazy Arrays}
+\section{Returning References in Lazy Arrays, Why a Referencing Index Operation was a Mistake}
 
 The problem with lazy types is that the \texttt{ArrayLike::get} method is required to return
 a reference type. Computing the desired result within the function body and attempting to return
 a reference to it is disallowed by the Rust compiler, as the required data is almost always allocated
 on the called function's stack frame --- a pointer thereto would be rendered dangling as soon as the
 function returned.
+
+This is an oversight of design and I am suspect of its correctness especially in \texttt{Map::get} which
+is implemented as:
+\begin{lstlisting}
+impl<'a, F, A : 'a, T, U> ArrayLike for Map<'a, F, A, T, U>
+where A : ArrayLike<Entry = T>, F : FnMut(T) -> U {
+  type Entry = U;
+  fn get<I>(&self, coord : &I) -> &Self::Entry
+  where I : ArrayLike<Entry = isize> {
+    get_set_coord_check!(Map::get, self, coord);
+    &self.0(self.1.get(coord))
+  }
+}
+\end{lstlisting}
+On line 4 of this snippet, the tuple indexing \texttt{self.0} has a type implementing
+the function trait \texttt{Fn(\&'a T) -> U} where \texttt{'a, T, U} are generic lifetime
+and type parameters given by \texttt{Map}. However, the function \texttt{self.0} returns
+a \texttt{U}, which we immediately reference, leaving ownership in `limbo.' So to speak.
+The compiler does not complain, but as I've said, I am suspect.
+
+More egregious is the \texttt{Fold} type, which in its current form is an unsafe hack.
+Out of ignorance, my current implementation uses the concept of interior mutability\cite[chapter 3.11]{RPL117}.
+In the implementation of \texttt{Fold::get} I resort to using unsafe casting primitives to
+circumvent the problems imposed by restrictive lifetimes.
+\begin{lstlisting}
+  fn get<I>(&self, coord : &I) -> &Self::Entry
+  where I : ArrayLike<Entry = isize> { 
+    let mut ix : Vec<_> = self.shape().iter().map(|a| *a as isize).collect();
+    ix.insert(self.3 .0 as usize, 0);
+    let mut acc = self.2.clone();
+    for i in 0 .. *self.0.shape().get(&self.3) {
+        ix[self.3 .0 as usize] = i as isize;
+        acc = self.1(acc, self.0.get(&ix))
+    }
+    { *self.4.borrow_mut() = Some(acc) }
+    match unsafe { transmute(&*self.4.borrow()) } {
+        &Some(ref q) => return q,
+        &None => unreachable!()
+    }
+  }
+\end{lstlisting}
+The field \texttt{self.4} is a \texttt{RefCell<T>} type: a primitive used in rust's standard
+library to allow data structures to have internally used mutable data while appearing 
+outwardly immutable (e.g. the reference counted pointer type \texttt{Rc<T>} uses this
+concept internally.)
+
+At the time of implementing \texttt{Fold} I thought it possible to use a single cell
+of memory to allow the computation of the result value and then return that. This of
+course creates a massive problem when one wishes to e.g. add two cells of a \texttt{Fold}
+together, as the computation of the second value will invalidate the reference to the
+first.
+
+This issues have come up in code review, and introduces unsoundness into the program. 
+Rust is predicated on strong soundness guarantees: no data is mutably and immutably
+referenced at the same time, no immutably referenced data mutates, no mutably referenced
+data has more than one reference to it.
+
+\section{Falling Short of the Goal, Plan for v.0.2, Future Work}
+
+\begin{center}
+  ``Everything should be built top-down, except the first time.''\\
+  --- \emph{Alan Perlis}\cite{AP82}.
+\end{center}
+
+As stated in the abstract and introduction, the goals I set for this project
+back in January was to eventually arrive at a practical array library capable
+of performing linear algebra operations as per Example~\ref{ex:matrix-product}.
+
+What I have produced, as can be found in the theoretical sections, and the partial
+implementation of my intended library in Appendix~\ref{sec:apx-code}.
+
+A brief listing of what work is left undone:
+\begin{itemize}
+  \item A top-down realization of \(\Arr{\brm{Set}}\) with accompanying
+    proofs of category-theoretically significant properties.
+  \item An implementation of the outer-product array type.
+  \item An implementation of the general slice array type.
+  \item Rewriting several hacks to idiomatic rust code.
+  \item Re-thinking of the trait structure.
+  \item Finding a way to circumvent lifetime problems.
+  \item Implementing linear algebra algorithms.
+\end{itemize}
+
+In particular, there is a technique to circumvent the absence of
+higher kinded types in Rust, which is to implement a trait\cite{HKT15}:
+\begin{lstlisting}
+trait HKT<T> {
+  type Content;
+  type Replaced;
+}
+\end{lstlisting}
+and implement it for types with a generic type parameter:
+\begin{lstlisting}
+impl<T, U> HKT<U> for Vec<T> {
+  type Current = T;
+  type Replaced = Vec<U>;
+}
+\end{lstlisting}
+
+This effectively enables us to use \texttt{HKT<U>} as a trait bound
+to implement e.g. a trait that mimics the \texttt{Functor} type class in Haskell.
+
+A similar idea can be applied to lifetimes:
+\begin{lstlisting}
+trait LTP {
+    type _Ref : Deref<Target = ()>;
+}
+
+impl<'a, T> LTP for &'a T {
+    type _Ref = &'a ();
+}
+
+impl<'a, T : ToOwned> LTP for &'a mut T {
+    type _Ref = &'a ();
+}
+
+trait LTPG<'a> : LTP {
+    type Current;
+    type Replaced;
+}
+
+impl<'a, 'b, T : 'a + 'b> LTPG<'a> for &'b T where Self : LTP<_Ref = &'b ()> {
+    type Current = &'a T;
+    type Replaced = &'b T;
+}
+
+impl<'a, 'b, T : 'a + 'b> LTPG<'a> for &'b mut T where Self : LTP<_Ref = &'b ()> {
+    type Current = &'a mut T;
+    type Replaced = &'b mut T;
+}
+\end{lstlisting}
+although I have not come up with a good way to utilize this.
+
+\chapter{Conclusion}
+
+The stated goal has been to ``break new gound'' and showcase the potential innovations
+a formalized array-operation semantics can build. To summarize:
+
+\begin{itemize}
+  \item We have seen a minimal set of operations on arrays by studing natural
+    numbered mutiplication:
+    \begin{itemize}
+      \item Shape desription (the notion of an array domain being given as a list of `axes', corresponding
+        to associativity)
+      \item Transpose (re-ordering the axes of the array domain, corresponding to commutativity)
+      \item Diagonal (eliminating equal axes, corresponding to square-free numbers)
+      \item Reduce (eliminating axes, corresponding to division by divisor)
+      \item Tiling (creating impotent axes to pad the shape of an array, corresponding to multiplication
+        by known constant)
+      \item Outer product (combinatoric combination of the elements of two arrays, corresponding to
+        multiplication)
+    \end{itemize}
+  \item We have defined a variety of useful operations:
+    \begin{itemize}
+      \item Map (applying a function to every entry in an array)
+      \item Reduce/fold (quantified sum over an axis)
+      \item Outer product (binary function application)
+    \end{itemize}
+  \item We have identified universal properties:
+    \begin{itemize}
+      \item The outer product operation with a binary combining function can be decomposed
+        into the outer product with the simple pairing function, followed by map with the combining
+        function.
+      \item The reduce operation with a monoid can be decomposed into recution over the
+        free monoid, followed by map with a monoid homomorphism.
+    \end{itemize}
+\end{itemize}
+
+There are a number of open questions still:
+\begin{itemize}
+  \item Reduce with the free monoid creates arrays-of-lists, and lists are rank-1 arrays. What
+    is the relation to the operation of cutting an array into sub-arrays, like viewing a matrix
+    as a vector of row or column-vectors?
+  \item What is the exact nature of operations that do not preserve the value-at-origin,
+    versus those that do?
+\end{itemize}
+
+And the greatest theoretical hurdle left is to actually formalize the category of arrays
+and identify its nature (e.g. is it cartesian monodial? is it a topos?)
+
+The other goal was to showcase the power of one identified mathematical fact, namely that
+operations on arrays that do not change the codomain, are representable by precomposing with
+linear or affine transformations. This has been shown in theory, but the practical implementation
+falls short of achieving experimental support for the utility of this idea --- more work is needed
+here, as the code part of this project amounts to little more than
+an in-depth exploration of novel issues in using Rust.
+
+For a bachelor's thesis, the scope of this subject has grown perhaps a little beyond the guideline
+of approximately twenty pages. It does provide a nice starting point for futher projects outside
+course scope (sic. projekt uden for kursusregi,) academic publications, and possibly a Masters Thesis.
+
+I have also corresponded with one Justin R. Slepak at Noreastern University,
+Boston MA\footnote{\url{https://www.ccis.northeastern.edu/people/justin-slepak/}} who is
+working on rank-polymorphism in array languages, about the viability of the idea of a `minimal set of
+operatioons' and he expressed some enthusiasm for the idea.
+
+Formalization of multidimensional array semnatics, and multidimentional array slices presented via
+affine transformations are both powerful ideas and merits much futher study. A useful multidimensional
+array library with static typing, good memory performance, and sound semantics now seem closer than
+ever.
+
+\section{Acknowledgements}
+
+I would like to thank my thesis advisor Jyrki Katajainen for his steady and dependable
+support in writing this thesis.
+
+I would like to thank my friend and alumni Mathias Svensson for code review assistance and
+proofreading of formulas.
+
+I would like to thank my significant other for putting up with me for these six months.
 
 \clearpage
 \phantomsection
@@ -1675,6 +1856,7 @@ Generic:
 \end{description}
 
 \section{Code}
+\label{sec:apx-code}
 \lstset{ 
   backgroundcolor=\color{white},  
   basicstyle=\ttfamily,      
@@ -1740,15 +1922,17 @@ to be used as an array for shape descriptions.
 Generic reshape wrappers:
 \lstinputlisting{../cat_arrays/src/gen_reshape.rs}
 
-Generic slice wrappers:
+Generic slice wrappers (unfinished):
 \lstinputlisting{../cat_arrays/src/gen_slice.rs}
 
-Lazy Map implementation:
+Lazy map implementation:
 \lstinputlisting{../cat_arrays/src/map.rs}
 
-Lazy Fold implementation:
+Lazy fold implementation:
 \lstinputlisting{../cat_arrays/src/fold.rs}
 
+Lazy outer product implementation (unfinished):
+\lstinputlisting{../cat_arrays/src/outer_prod.rs}
 
 \vfill
 \begin{center}\itshape End appendices.\end{center}

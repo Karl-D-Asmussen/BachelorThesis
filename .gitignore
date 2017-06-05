@@ -13,5 +13,6 @@ texput.log
 *.pdf
 *.rlib
 *.d
+*.bk
 .irb_history
 debug/

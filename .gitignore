@@ -9,6 +9,8 @@
 *.toc
 *.out
 *.log
+*.nav
+*.snm
 texput.log
 *.pdf
 *.rlib

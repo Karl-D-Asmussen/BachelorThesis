@@ -68,10 +68,10 @@ impl<'a, F, T: 'a, U, A: 'a> ArrayLike for Fold<'a, F, T, U, A>
         where I: ArrayLike<Entry = isize>
     {
         let mut ix: Vec<_> = self.shape().iter().map(|a| *a as isize).collect();
-        ix.insert(self.3.0 as usize, 0);
+        ix.insert(self.3 .0 as usize, 0);
         let mut acc = self.2.clone();
         for i in 0..*self.0.shape().get(&self.3) {
-            ix[self.3.0 as usize] = i as isize;
+            ix[self.3 .0 as usize] = i as isize;
             acc = self.1(acc, self.0.get(&ix))
         }
         {

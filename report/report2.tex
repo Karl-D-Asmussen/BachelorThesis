@@ -247,6 +247,7 @@ models, and that is what we will explore in this chapter.
 \begin{remark}
   \label{rem:syntax}
   For the remainder of this report, we shall adopt a familiar syntax for arrays
+  of ranks 1 and 2:
   \begin{align*}
     A = [ x_0\; x_1\; \cdots \; x_{d-1} ] \quad \text{and} \quad
     B = \begin{bmatrix}
@@ -277,7 +278,7 @@ models, and that is what we will explore in this chapter.
   \label{ob:shape}
   Some observations on Definition~\ref{def:shape}:
   \begin{itemize}
-    \item The shape of the shape is the rank, \(\sharp \sharp A = d\).
+    \item The shape of the shape is the rank, \(\sharp \sharp A = [d]\).
     \item The shape of the shape of the shape is always 1, meaning \(\sharp \sharp \sharp A = [1]\).
     \item The shape of a singleton array may be a finite sequence of 1's of any length (including 0).
   \end{itemize}
@@ -321,23 +322,22 @@ models, and that is what we will explore in this chapter.
   last axis; that is to say in the order \((\dots,0), (\dots,1),\) \((\dots,2), \dots\);
   the last axis is thus the `most significant.'
 
-  Of note is also the reverse lexicographical order counts upwards by the first
+  Of note is also the colexicographical order counts upwards by the first
   axis, making the last axis the most significant: \((0,\dots), (1,\dots), (2,\dots), \dots\).
 
   The flat traversal of the array is then the composition of the finite
   sequence of points in the cuboid given by a lexicographical order,
   with the array \(A\), yielding a finite sequence --- a rank-1 array.
 
-  We denote the standard lexicographical traversal by \(\flat A\).
+  We denote the lexicographical or `flat' traversal by \(\flat A\).
 \end{definition}
 \begin{observation}
   \label{ob:flat}
   Some observations on Definition~\ref{def:flat}
   \begin{itemize}
-    \item The traversal of a rank-1 array is itself, \(\sharp \sharp A = 1 \impl \flat A = A\).
-
-    \item The shape of a traversal of an array is the product over the shape
-      of the array \(\sharp \flat A = \prod \sharp A\).
+    \item The traversal of a rank-1 array is itself, \(\sharp \sharp A = [1] \impl \flat A = A\).
+    \item The shape of the flat traversal of an array is the product over the shape
+       of said array \(\sharp \flat A = \left[\prod \sharp A\right]\).
   \end{itemize}
 \end{observation}
 
@@ -349,8 +349,9 @@ models, and that is what we will explore in this chapter.
   defined over, which is the product of the cardinalities of constituent axes as
   per Definition \ref{def:cuboid}.
 
-  Hence we have that \(|A| = \sharp \flat A = \prod \sharp A\).
-  We shall however prefer the notation \(\sharp \flat A\), as it
+  Hence we have that \(|A| = \prod \sharp A\).
+  We shall however prefer \(\sharp \flat A\), as it derives directly from
+  the array concepts.
 \end{observation}
 
 \begin{example}
@@ -365,20 +366,20 @@ models, and that is what we will explore in this chapter.
     \end{bmatrix} \quad \sharp A = [3\; 3]
   \end{align*}
   is \([1\; 2\; 3\; 4\; 5\; 6\; 7\; 8\; 9]\).
-  The reverse traversal is \([1\; 4\; 7\; 2\; 5\; 8\; 3\; 6\; 9]\).
+  The colex traversal is \([1\; 4\; 7\; 2\; 5\; 8\; 3\; 6\; 9]\).
 \end{example}
 
 \begin{observation}
   \label{ob:c-fortran-order}
-  The standard and reverse lexicographical traversals of an array to some extent
+  The lexicographical and colexicographical traversals of an array to some extent
   mimic reinterpreting an array as a sequence of contiguous cells in memory.
 
   By definition, our arrays are mathematical objects, and therefore have no
   implementation or embedding in computer memory, but even so, the lexicographical
-  traversal corresponds to the C-layout and the reverse lexicographical
+  traversal corresponds to the C-layout and the colexicographical
   traversal is the Fortran-layout.
 
-  The reverse lexicographical traversal is rarely useful, save to illustrate
+  The colexicographical traversal is rarely useful, save to illustrate
   this point.
 \end{observation}
 
@@ -635,7 +636,7 @@ The deletion of an element of the shape in this manner can model many things.
 
 As an example,
 consider the rank-2 array \(A = \left[\begin{smallmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{smallmatrix}\right]\).
-We have that \(\sharp A = [2\; 3]\). Selecting only the first row \([1\;2\;3]\) yields an array of shape 3,
+We have that \(\sharp A = [2\; 3]\). Selecting only the first row \([1\;2\;3]\) yields an array of shape \([3]\),
 meaning we have eliminated the 2 --- it has been `divided out.'
 
 This example of array slicing is evocative and seems correct, but ultimately does not fit our categorical
@@ -643,7 +644,7 @@ definition: there are two distinct operations with which to slice \(A\) into a s
 and the second row. The definition states that there is only one.
 
 Consider instead an alternative: given a rank-1 array \(B = [2\;3\;4]\) the sum of the
-elements of \(B\) is 9, and \(\sharp 9 = 1\). Contrary to indexing the array, of which there are
+elements of \(B\) is 9, and \(\sharp [9] = [1]\). Contrary to indexing/slicing the array, of which there are
 three different outcomes, there is only one sum. This fits better.
 
 Now, one must also consider that one can take the product of the elements of \(B\) (yielding 24) which
@@ -961,24 +962,29 @@ arrays in a top-down manner.
   \end{align*}
 
   We denote it by \( B = \reduce_{(S, \oplus, \epsilon),d} A \)
-
-  In a rank-1 array, the reduction is just the ordinary quantified monoid sum.
-
-  If the array has null domain (see Definition \ref{def:cuboid}) the result is
-  the monoid identity.
 \end{definition}
+
+\begin{observation}
+  \label{ob:reduce} Some observations on Definition~\ref{def:reduce}:
+
+  \begin{itemize}
+    \item In a rank-1 array, the reduction is just the ordinary quantified monoid sum.
+    \item If the array has null domain (see Definition~\ref{def:cuboid}) the result is
+    the monoid identity.
+  \end{itemize}
+\end{observation}
 
 \begin{example}
   \label{ex:reduce}
-  The sum of the elements of each row-vector of a vector can be found by using the monoid \((\Real, +, 0)\)
-  and working on the second axis (1) of a matrix
+  The sum of the elements of each row-vector of a matrix can be found by using the monoid \((\Real, +, 0)\)
+  and working on the second axis of a matrix (recall that axes are enumerated counting from zero)
   \begin{align*}
     \reduce_{(\Real, +, 0), 1} \begin{bmatrix}
       a & b & c \\
       d & e & f
     \end{bmatrix} = [(a + b + c)\;\;(d + e + f)]
   \end{align*}
-  If we wish to sum the elements of each column-vector, we use the first axis (0)
+  If we wish to sum the elements of each column-vector, we use the first axis
   \begin{align*}
     \reduce_{(\Real, +, 0), 0} \begin{bmatrix}
       a & b & c \\
@@ -990,10 +996,10 @@ arrays in a top-down manner.
 \begin{remark}
   \label{rem:reduce}
   It is possible to use a simpler structure than a monoid to perform
-  the reduce operation, for instance a Semigroup or a Magma. Using a semigroup
+  the reduce operation, for instance a Semigroup or an accumulator function. Using a semigroup
   makes the operation undefined for null arrays, unless we specify the neutral element
-  on a case-by-case basis; using a Magma we lose the ability to do divide-and-conquer
-  parallel processing and we introduces the left-fold/right-fold distinction.
+  on a case-by-case basis; using an accumulator function we lose the ability to do divide-and-conquer
+  parallel processing and we are forced to introduce e.g. the left-fold/right-fold distinction.
 \end{remark}
 
 \begin{definition}
@@ -1014,15 +1020,22 @@ arrays in a top-down manner.
   We denote it by \(B = \diag_{k_1,k_2} A\).
 
   If more than two axes are equal, this definition of binary diagonal can easily be extended to
-  \(d\)-ary diagonal by repeated application of the operator.
+  \(n\)-ary diagonal by repeated application of the operator.
 \end{definition}
 
 \begin{example}
   \label{ex:trace}
-  The trace of a matrix is the sum of the diagonal. We can describe it with the diagonal
+  The trace of a matrix is the sum of the main diagonal. We can describe it with the diagonal
   and reduce operators
   \begin{align*}
-    \operatorname*{\brm{tr}} M = \reduce_{(\Real,+,0),0} \diag_{0,1} M
+    \brm A &= \begin{bmatrix}
+      a_{0,0} & \cdots & a_{0,n{-}1} \\
+      \vdots & \ddots & \vdots \\
+      a_{n{-}1,0} & \cdots & a_{n{-}1,n{-}1} \\
+    \end{bmatrix} \\
+    \operatorname*{\brm{tr}} \brm A &= \reduce_{(\Real,+,0),0} \diag_{0,1} \brm A \\
+    \operatorname*{\brm{tr}} \brm A &= \reduce_{(\Real,+,0),0} [ a_{0,0}\;a_{1,1}\;\cdots\; a_{n{-}1,n{-}1} ] \\
+    \operatorname*{\brm{tr}} \brm A &= a_{0,0}+a_{1,1}+\cdots+ a_{n{-}1,n{-}1} 
   \end{align*}
 \end{example}
 
@@ -1058,7 +1071,9 @@ arrays in a top-down manner.
 
 \begin{remark}
   Contrary to the category-theoretical definition of the outer product given in
-  Definition~\ref{def:category-of-arrays}
+  Definition~\ref{def:category-of-arrays}, the outer product as defined in Definition~\ref{def:outer-product}
+  is predicated on some combination function. To achieve the most general outer product,
+  we simply use the pairing function \(P(x, y) = (x, y)\).
 \end{remark}
 
 \begin{example}

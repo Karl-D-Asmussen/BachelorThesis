@@ -1,0 +1,224 @@
+\documentclass[xetex,mathserif,serif]{beamer}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{xcolor}
+
+\newcommand\mrm[1]{\mathrm{#1}}
+\newcommand\brm[1]{\bm{\mrm{#1}}}
+\newcommand\Nat{\mathbb{N}}
+\newcommand\Real{\mathbb{R}}
+\newcommand\Com{\mathbb{C}}
+\newcommand\Arr[1]{{\brm{Arr}_{\brm{#1}}}}
+\newcommand\SFR{\sharp\flat\varrho}
+\newcommand\SSFR{\sigma\sharp\flat\varrho}
+\newcommand\DSSFR{\div\sigma\sharp\flat\varrho}
+\newcommand\ADSSFR{\approx\div\sigma\sharp\flat\varrho}
+\newcommand\CADSSFR{c\cdot\approx\div\sigma\sharp\flat\varrho}
+\newcommand\XCADSSFR{\times c\cdot\approx\div\sigma\sharp\flat\varrho}
+\newcommand\impl{\mathrel{\Rightarrow}}
+\newcommand\tlaf{\mathop{\rotatebox[origin=c]{180}{$\flat$}}}
+\newcommand\reduce{\operatorname*{\brm{reduce}\,}}
+\newcommand\diag{\operatorname*{\brm{diag}\,}}
+\newcommand\tile{\operatorname*{\brm{tile}\,}}
+\newcommand\oprodbgraphicxy[1]{\mathop{\operatorname*{\,\brm{by}}_{#1}}}
+
+\newcommand\NB[1]{\textcolor{red}{#1}}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Multidimensional Arrays: Formally Specified by Shape Description and Sliced by Affine Functions}
+  \framesubtitle{Bachelor's thesis by Karl D. Asmussen \\
+  With advisor Jyrki Katajainen}
+  
+  \[
+    \bm{\mathrm{A}} : m \times n
+  \]
+  \[ \bm{\mathrm{A}}=
+      \begin{bmatrix}
+        a_{\text{\tiny$0,0$}} & \cdots & a_{\text{\tiny$0,n{-}1$}} \\
+        \vdots & \ddots & \vdots \\
+        a_{\text{\tiny$m{-}1,0$}} & \cdots & a_{\text{\tiny$m{-}1,n{-}1$}}
+      \end{bmatrix}
+  \]
+\end{frame}
+
+\begin{frame}
+  \frametitle{What is a multidimensional array?}
+  \stepcounter{beamerpauses} 
+  \begin{itemize}[<+->]
+    \item A mapping (function) from integer coordinates to some underlying set
+    \item Coordinates taken from higher-dimensional space
+    \item Domain restricted to a bounding box with corner at origo (product order)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The Shape of an array}
+  % SHAPE
+  \stepcounter{beamerpauses} 
+  \begin{itemize}[<+->]
+    \item The rank of an array $\brm A$ is the number of dimensions $d$ in its domain space
+    \item Product order: $(a, b) < (a', b') \iff a < a' \land b < b'$
+    \item Bounding box corners: $\brm o = (0, \dots, 0), \brm x = (k_0, \cdots, k_d)$
+    \item Domain: $\{\brm c \in \Nat^d \mid \brm o \le \brm c \le \brm x\}$
+    \item $= \Nat_{<k_0} \times \cdots \times \Nat_{<k_d}$
+    \item Shape: $\brm x$
+    \item ``Sharp:'' $\sharp A = \brm x$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Shape description}
+  % DESC
+  \stepcounter{beamerpauses} 
+  \begin{itemize}[<+->]
+    \item A shape is just a vector of natural numbers
+    \item (a rank-1 array, a list)
+    \item The number of elements in an array is precisely the
+      product of the shape
+    \item $|\brm A| = \prod_{i=0}^d \sharp \brm A (i)$
+    \item Operations on shape list $\iff$ operations on arrays?
+    \item Operations on shape product $\iff$ operations on arrays?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece}
+  % TRANS
+  \stepcounter{beamerpauses} 
+  \begin{itemize}[<+->]
+    \item Swap elements $[2\ 3] \leadsto [3\ 2]$
+    \item Commutativity $2\times3 = 3\times2$
+    \item \NB{Transpose} $\brm M : 2\times3\quad \brm M^\intercal : 3\times2$
+    \item $
+      \begin{bmatrix}
+        \NB 1 & 2 & 3 \\
+        4 & \NB 5 & 6
+      \end{bmatrix} \leadsto
+      \begin{bmatrix}
+        \NB 1 & 4 \\
+        2 & \NB 5 \\
+        3 & 6
+      \end{bmatrix}
+    $
+    \item Suggestive!
+    \item \NB{Precompose} with coordinate permutation
+    \item $\sigma = (x, y) \mapsto (y, x)$
+    \item $\sharp \brm A = [2\ 3] \implies \sharp(\brm A \circ \sigma) = [3\;2]$ 
+    \item Generalizes
+    \item $\sigma' = (x, y, z) \mapsto (z, x, y)$
+    \item $\sharp \brm B = [2\ 3\ 4] \implies \sharp(\brm B \circ \sigma') = [4\ 2\ 3]$ 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece}
+  % TILE
+  \stepcounter{beamerpauses} 
+  \begin{itemize}[<+->]
+    \item Insert $[2] \leadsto [2\;4]$
+    \item Multiply by constant $2\leadsto 2\times 4$
+    \item \NB{Tile} $
+      \begin{bmatrix} 1 \\ 2 \end{bmatrix}\leadsto
+      \begin{bmatrix} 1 & \NB 1 & \NB 1 & \NB  1 \\ 2 & \NB 2 & \NB 2 & \NB 2 \end{bmatrix}
+    $
+    \item Precompose with projection
+    \item $\pi = (x, y) \mapsto (x)$
+    \item $\sharp \brm A = [2] \implies \NB{\forall n.} \sharp(\brm A \circ \pi) = [2\ \NB n]$
+    \item Let $n = 4$
+    \item Let $\pi : \Nat_{<2} \times \Nat_{<4} \to \Nat_{<2}$
+    \item Generalises
+    \item $[2\ 3] \leadsto [2\ 4\ 3]$
+    \item $\pi' = (x, y, z) \mapsto (x, z)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece}
+  % DIAG
+  \begin{itemize}[<+->]
+    \item Remove non-unique $[3\ 2\ 2] \leadsto [3\ 2]$
+    \item Square free $3\times 2\times 2\leadsto 3 \times 2$
+    \item \NB{Diagonal} $
+      \begin{bmatrix}
+        \NB 1 & 2 \\
+        3 & \NB 4
+      \end{bmatrix} \leadsto [1\ 4]
+      $
+    \item Generalizes $
+      \begin{bmatrix}
+        \begin{pmatrix}
+          \NB 1 & 2 \\ 3 &\NB  4
+        \end{pmatrix}
+        \begin{pmatrix}
+          \NB 5 & 6 \\ 7 & \NB 8
+        \end{pmatrix}
+        \begin{pmatrix}
+          \NB 9 & 10 \\ 11 & \NB{12}
+        \end{pmatrix}
+      \end{bmatrix} = 
+      \begin{bmatrix}
+        (\NB 1\ 2) & (3\ \NB 4) \\
+        (\NB 5\ 6) & (7\ \NB 8) \\
+        (\NB 9\ 10) & (11\ \NB{12})
+      \end{bmatrix}  
+      $
+    \item Precompose with ``duplication'' function
+    \item $W = (x, y) \mapsto (x, y, y)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece}
+  % FLAT
+  \stepcounter{beamerpauses} 
+  \begin{itemize}[<+->]
+    \item Compute product $2 \times 3 = 6$
+    \item Reduce by multiplication $\left[\prod_{i=0}^1 [2\ 3](i)\right] = [ 6 ]$
+    \item ``Vectorize'' or \NB{Flatten} $
+      \begin{bmatrix}
+        1 & 2 & 3 \\
+        4 & 5 & 6
+      \end{bmatrix} \leadsto [1\ 2\ 3\ 4\ 5\ 6]
+      $
+    \item Precompose with lexicographical order on domain $
+      L = \{(0) \mapsto (0,0), (1)\mapsto (0,1), (2)\mapsto(0,2), (3)\mapsto(1,0), (4)\mapsto(1,1), (5)\mapsto(1,2)\}
+      $
+    \item $\sharp \brm A = [2\ 3] \implies \sharp (\brm A \circ L) = [6] $
+    \item \NB{Row} major: C, Numpy
+    \item Right associative $\Pi$-type\\
+      \texttt{template<int n, typename T> class Array;} \\
+      \texttt{typedef Array<2, Array<3, T>> MyArray;}
+    \item $\flat \brm A$ to match $\sharp \brm A$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece}
+  % TLAF
+  \begin{itemize}[<+->]
+    \item Or? $
+      \begin{bmatrix}
+        1 & 2 & 3 \\
+        4 & 5 & 6
+      \end{bmatrix} \leadsto [1\ 4\ 2\ 5\ 3\ 6]
+      $ 
+    \item Precompose with colexicographical order instead
+      $\mrm{co}L = \{ (0)\mapsto(0,0), (1)\mapsto(1,0), (2)\mapsto(0,1), (3)\mapsto(1,1), (4)\mapsto(0,2), (5)\mapsto(1,2) \}$
+    \item \NB{Column} major: Fortran
+    \item Left associative $\Pi$-type \\
+      \texttt{template<typename T, int n> class Array;} \\
+      \texttt{typedef Array<Array<T, 2>, 3> MyArray;}
+    \item Perhaps $\tlaf \brm A$? Pick one, stick with it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece}
+  % RESH
+\end{frame}
+
+\end{document}

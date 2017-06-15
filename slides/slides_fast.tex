@@ -50,8 +50,8 @@
 
 \begin{frame}
   \frametitle{What is a multidimensional array?}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item A mapping (function) from integer coordinates to some underlying set
     \item Coordinates taken from higher-dimensional space
     \item Domain restricted to a bounding box with corner at origo (product order)
@@ -61,8 +61,8 @@
 \begin{frame}
   \frametitle{The Shape of an array}
   % SHAPE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item The rank of an array $\brm A$ is the number of dimensions $d$ in its domain space
     \item Product order: $(a, b) < (a', b') \iff a < a' \land b < b'$
     \item Bounding box corners: $\brm o = (0, \dots, 0), \brm x = (k_0, \cdots, k_d)$
@@ -76,8 +76,8 @@
 \begin{frame}
   \frametitle{Shape description}
   % DESC
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item A shape is just a vector of natural numbers
     \item (a rank-1 array, a list)
     \item The number of elements in an array is precisely the
@@ -91,8 +91,8 @@
 \begin{frame}
   \frametitle{Correspondece}
   % TRANS
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Swap elements $[2\ 3] \leadsto [3\ 2]$
     \item Commutativity $2\times3 = 3\times2$
     \item \NB{Transpose} $\brm M : 2\times3\quad \brm M^\intercal : 3\times2$
@@ -120,8 +120,8 @@
 \begin{frame}
   \frametitle{Correspondece}
   % TILE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Insert $[2] \leadsto [2\;4]$
     \item Multiply by constant $2\leadsto 2\times 4$
     \item \NB{Tile} $
@@ -142,7 +142,7 @@
 \begin{frame}
   \frametitle{Correspondece}
   % DIAG
-  \begin{itemize}[<+->]
+  \begin{itemize}%[<+->]
     \item Remove non-unique $[3\ 2\ 2] \leadsto [3\ 2]$
     \item Square free $3\times 2\times 2\leadsto 3 \times 2$
     \item \NB{Diagonal} $
@@ -177,8 +177,8 @@
 \begin{frame}
   \frametitle{Correspondece}
   % FLAT
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Compute product $2 \times 3 = 6$
     \item Reduce by multiplication $\left[\prod_{i=0}^1 [2\ 3](i)\right] = [ 6 ]$
     \item ``Vectorize'' or \NB{Flatten} $
@@ -201,8 +201,8 @@
 \begin{frame}
   \frametitle{Correspondece}
   % TLAF
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Or? $
       \begin{bmatrix}
         1 & 2 & 3 \\
@@ -222,8 +222,8 @@
 \begin{frame}
   \frametitle{Correspondece}
   % RESH
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Can we go backwards from \(\flat A\)?
     \item Have \(20\times 5\) array \(A\) --- 100 elements.
     \item Desired: \(10 \times 10\) --- 100 elements.
@@ -240,8 +240,8 @@
 \begin{frame}
   \frametitle{Correspondece}
   % FIXATE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Delete \([2\;3] \leadsto [2]\)
     \item Divide by constant \(\frac{2 \times 3} 3 = 2\)
     \item Extract/project subarray/row/column

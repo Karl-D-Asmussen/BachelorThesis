@@ -1,0 +1,3 @@
+#/bin/zsh
+sed 's/\[<+->\]\|\\pause/%&/;' slides.tex > slides_fast.tex
+xelatex slides.tex && xelatex slides_fast.tex

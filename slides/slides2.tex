@@ -1,0 +1,628 @@
+\documentclass[xetex,mathserif,serif]{beamer}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{xcolor}
+
+\usepackage{tikz-cd}
+
+\newcommand\mrm[1]{\mathrm{#1}}
+\newcommand\brm[1]{\bm{\mrm{#1}}}
+\newcommand\Nat{\mathbb{N}}
+\newcommand\Zheil{\mathbb{Z}}
+\newcommand\Real{\mathbb{R}}
+\newcommand\Com{\mathbb{C}}
+\newcommand\Arr[1]{{\brm{Arr}_{\brm{#1}}}}
+\newcommand\SFR{\sharp\flat\varrho}
+\newcommand\SSFR{\sigma\sharp\flat\varrho}
+\newcommand\DSSFR{\div\sigma\sharp\flat\varrho}
+\newcommand\ADSSFR{\approx\div\sigma\sharp\flat\varrho}
+\newcommand\CADSSFR{c\cdot\approx\div\sigma\sharp\flat\varrho}
+\newcommand\XCADSSFR{\times c\cdot\approx\div\sigma\sharp\flat\varrho}
+\newcommand\impl{\mathrel{\Rightarrow}}
+\newcommand\tlaf{\mathop{\rotatebox[origin=c]{180}{$\flat$}}}
+\newcommand\reduce{\operatorname*{\brm{reduce}\,}}
+\newcommand\diag{\operatorname*{\brm{diag}\,}}
+\newcommand\tile{\operatorname*{\brm{tile}\,}}
+\newcommand\oprodby[1]{\mathop{\operatorname*{\,\brm{by}}_{#1}\,}}
+
+\newcommand\NB[1]{\textcolor{red}{#1}}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Multidimensional Arrays: Formally Specified by Shape Description and Sliced by Affine Functions}
+  \framesubtitle{Bachelor's thesis by Karl D. Asmussen \\
+  With advisor Jyrki Katajainen}
+  
+  \[
+    \bm{\mathrm{A}} : m \times n
+  \]
+  \[ \bm{\mathrm{A}}=
+      \begin{bmatrix}
+        a_{\text{\tiny$0,0$}} & \cdots & a_{\text{\tiny$0,n{-}1$}} \\
+        \vdots & \ddots & \vdots \\
+        a_{\text{\tiny$m{-}1,0$}} & \cdots & a_{\text{\tiny$m{-}1,n{-}1$}}
+      \end{bmatrix}
+  \]
+\end{frame}
+
+\begin{frame}
+  \frametitle{What is a multidimensional array?}
+  \pause
+  \begin{itemize}[<+->]
+    \item A mapping (function) from integer coordinates to some underlying set
+    \item Coordinates taken from higher-dimensional space
+    \item Domain restricted to a bounding box with corner at origo (product order)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Terminology}
+  \pause
+  \begin{itemize}[<+->]
+    \item The rank of an array is the number of dimensions \(d\) in its domain space
+    \item Array lookup is done at a coordinate \(\brm c = (c_0,\dots,c_d)\)
+    \item Coordinates are composed of indexes \(c_0,\dots,c_d\)
+    \item The set of values an index can range over \(c_0 \in \Nat_{<k}\) is an axis
+    \item \(\Nat_{<k} = \{ n \in \Nat \mid n < k \}\)
+    \item The Shape of an array\dots
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The Shape of an array}
+  % SHAPE
+  \pause
+  \begin{itemize}[<+->]
+    \item Product order:\\
+      \((a, b) < (a', b') \iff a < a' \land b < b'\)\\
+      \((a, b) \le (a', b') \iff a \le a' \land b \le b'\)
+    \item Bounding box corners: \(\brm o = (0, \dots, 0), \brm x = (k_0, \cdots, k_d)\)
+    \item Domain: \(\{\brm c \in \Zheil^d \mid \brm o \le \brm c < \brm x\}\)
+    \item \(= \Nat_{<k_0} \times \cdots \times \Nat_{<k_d}\)
+    \item Shape: \(\brm x\)
+    \item ``Sharp:'' \(\sharp A = \brm x\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Shape description}
+  % DESC
+  \pause
+  \begin{itemize}[<+->]
+    \item A shape is just a vector of natural numbers
+    \item (a rank-1 array, a list)
+    \item The number of elements in an array is precisely the
+      product of the shape
+    \item \(|\brm A| = \prod_{i=0}^d \sharp \brm A (i)\)
+    \item Operations on shape list \(\iff\) operations on arrays?
+    \item Operations on shape product \(\iff\) operations on arrays?
+    \item Correspondence
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Motivating Example --- Transpose}
+  % TRANS
+  \pause
+  \begin{itemize}[<+->]
+    \item Permute \([2\ 3] \leadsto [3\ 2]\)
+    \item Commutativity \(2\times3 = 3\times2\)
+    \item \NB{Transpose} \(\brm M : 2\times3\quad \brm M^\intercal : 3\times2\)
+    \item \(
+      \begin{bmatrix}
+        \NB 1 & 2 & 3 \\
+        4 & \NB 5 & 6
+      \end{bmatrix} \leadsto
+      \begin{bmatrix}
+        \NB 1 & 4 \\
+        2 & \NB 5 \\
+        3 & 6
+      \end{bmatrix}
+      \)
+    \item Suggestive!
+    \item \NB{Precompose} with coordinate permutation
+    \item \(\sigma = (x, y) \mapsto (y, x)\)
+    \item \(\sharp \brm A = [2\ 3] \implies \sharp(\brm A \circ \sigma) = [3\;2]\) 
+    \item Generalizes
+    \item \(\sigma' = (x, y, z) \mapsto (z, x, y)\)
+    \item \(\sharp \brm B = [2\ 3\ 4] \implies \sharp(\brm B \circ \sigma') = [4\ 2\ 3]\) 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: More in the Same Vein --- Tile}
+  % TILE
+  \pause
+  \begin{itemize}[<+->]
+    \item Insert \([2] \leadsto [2\;4]\)
+    \item Multiply by constant \(2\leadsto 2\times 4\)
+    \item \NB{Tile} \[
+      [1\;2]\leadsto
+      \begin{bmatrix} 1 \\ 2 \end{bmatrix}\leadsto
+      \begin{bmatrix} 1 & \NB 1 & \NB 1 & \NB  1 \\ 2 & \NB 2 & \NB 2 & \NB 2 \end{bmatrix}
+    \]
+    \item Precompose with projection
+    \item \(\pi = (x, y) \mapsto (x)\)
+    \item \(\sharp \brm A = [2] \implies \NB{\forall n.} \sharp(\brm A \circ \pi) = [2\ \NB n]\)
+    \item NumPy broadcasting
+    \item Let \(n = 4\)
+    \item Let \(\pi : \Nat_{<2} \times \Nat_{<4} \to \Nat_{<2}\)
+    \item Generalises
+    \item \([2\ 3] \leadsto [2\ 4\ 3]\)
+    \item \(\pi' = (x, y, z) \mapsto (x, z)\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Diagonal}
+  % DIAG
+  \pause
+  \begin{itemize}[<+->]
+    \item Remove non-unique \([3\ 2\ 2] \leadsto [3\ 2]\)
+    \item Square free \(3\times 2\times 2\leadsto 3 \times 2\)
+    \item \NB{Diagonal} \(
+      \begin{bmatrix}
+        \NB 1 & 2 \\
+        3 & \NB 4
+      \end{bmatrix} \leadsto [1\ 4]
+      \)
+    \item Generalizes \[
+      \!\!\!\!
+      \begin{bmatrix}
+        \begin{pmatrix}
+          \NB 1 & 2 \\ 3 &\NB  4
+        \end{pmatrix}
+        \begin{pmatrix}
+          \NB 5 & 6 \\ 7 & \NB 8
+        \end{pmatrix}
+        \begin{pmatrix}
+          \NB 9 & 10 \\ 11 & \NB{12}
+        \end{pmatrix}
+      \end{bmatrix}_3 = 
+      \begin{bmatrix}
+        (\NB 1\ 2) & (3\ \NB 4) \\
+        (\NB 5\ 6) & (7\ \NB 8) \\
+        (\NB 9\ 10) & (11\ \NB{12})
+      \end{bmatrix} \leadsto
+      \begin{bmatrix}
+        1 & 4 \\
+        5 & 8 \\
+        9 & 12 
+      \end{bmatrix}
+      \]
+    \item Precompose with ``duplication'' function
+    \item \(W = (x, y) \mapsto (x, y, y)\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Indexing Generalized}
+  % FIXATE
+  \pause
+  \begin{itemize}[<+->]
+    \item Delete \([2\;3] \leadsto [2]\)
+    \item Index/extract/project subarray/row/column
+      \[
+        \begin{bmatrix}
+          1 & \NB 2 & 3 \\ 4 & \NB 5 & 6
+        \end{bmatrix} \leadsto
+        [2\;5]
+      \]
+    \item Corner case: delete \([2] \leadsto []\)
+    \item Zero-dimensional arrays have 1 element: \([1\;\NB 2\;3] \leadsto [2]_0\)
+    \item Precompose with constant function
+    \item \(k = (x)\mapsto (x, 2)\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Slice}
+  % SLICE
+  \pause
+  \begin{itemize}[<+->]
+    \item Vector subtraction \( [3\;5] - [1\;2] = [2\;3] \)
+    \item Slice with stride
+      \[
+        \begin{bmatrix}
+          1 & \NB 2 & \NB 3 & \NB 4 & 5 \\
+          6 & 7 & 8 &  9 & 10 \\
+          11 & \NB{12} & \NB{13} & \NB{14} & 15
+        \end{bmatrix} \leadsto \begin{bmatrix}
+          2 & 3 & 4 \\
+          12 & 13 & 14
+        \end{bmatrix}
+      \]
+    \item Precompose with affine functions of each axis \(f(x) = ax + b\)
+    \item \(S = (x, y) \mapsto (2x + 0, 1y + 1)\)
+    \item \(S : \Nat_{<3}\times\Nat_{<5} \to \Nat_{<2}\times\Nat_{<3}\)
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Correspondece: Key insight}
+  \pause
+  \begin{itemize}[<+->]
+    \item Transpose, Diagonal, Tile, Fixate, Slice.
+    \item Can be modeled as linear transforms in homogenous coordinates.
+    \item Transpose \(\bigg(\begin{smallmatrix} 1 & 0 & 0 && 0 \\ 0 & 0 & 1 && 0 \\ 0 & 1 & 0 && 0 \end{smallmatrix}\bigg)\)
+    \item Diagonal \(\big(\begin{smallmatrix} 1 & 0 & 0 && 0 \\ 0 & 1 & 1 && 0 \end{smallmatrix}\big)\)
+    \item Tile \(\big(\begin{smallmatrix} 1 & 0 & 0 && 0 \\ 0 & 1 & 0 && 0 \end{smallmatrix}\big)\)
+    \item Fixate \(\bigg(\begin{smallmatrix} 1 & 0 && 0 \\ 0 & 0 && 1 \\ 0 & 1 && 0 \end{smallmatrix}\bigg)\)
+    \item Slice \(\big(\begin{smallmatrix} 1 & 0 && 1 \\ 0 & 2 && 0 \end{smallmatrix}\big)\)
+    \item Bonus: Reverse \(\big(\begin{smallmatrix} -1 & 0 && k_0-1 \\ 0 & 1 && 0 \end{smallmatrix}\big)\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Summary so far \#1}
+  \pause
+  \begin{itemize}[<+->]
+    \item Precompose with linear or affine function in natural coordinates \(f : \Nat^q \to \Nat^d\).
+    \item Linear: transpose, diagonal, tile, reverse
+    \item Preserves origin index \(A(0, \dots, 0) = (A \circ f)(0, \dots, 0)\)
+    \item Affine: slice, fixate
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Flat}
+  % FLAT
+  \pause
+  \begin{itemize}[<+->]
+    \item Compute product \(2 \times 3 = 6\)
+    \item Reduce by multiplication \(\left[\prod_{i=0}^1 [2\ 3](i)\right] = [ 6 ]\)
+    \item ``Vectorize'' or \NB{Flatten} \[
+      \begin{bmatrix}
+        1 & 2 & 3 \\
+        4 & 5 & 6
+      \end{bmatrix} \leadsto [1\ 2\ 3\ 4\ 5\ 6]
+      \]
+    \item Precompose with lexicographical order on domain $
+      L = \{(0) \mapsto (0,0), (1)\mapsto (0,1), (2)\mapsto(0,2), (3)\mapsto(1,0), (4)\mapsto(1,1), (5)\mapsto(1,2)\}
+      $
+    \item \(\sharp \brm A = [2\ 3] \implies \sharp (\brm A \circ L) = [6] \)
+    \item \NB{Row} major: C, Numpy
+    \item Right associative \(\Pi\)-type\\
+      \texttt{typedef Array<\NB 2, Array<\NB 3, T>> MyArray;}
+    \item \(\flat \brm A\) to match \(\sharp \brm A\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Flat 2}
+  % TLAF
+  \pause
+  \begin{itemize}[<+->]
+    \item Or? $
+      \begin{bmatrix}
+        1 & 2 & 3 \\
+        4 & 5 & 6
+      \end{bmatrix} \leadsto [1\ 4\ 2\ 5\ 3\ 6]
+      $ 
+    \item Precompose with colexicographical order instead
+      \(\mrm{co}L = \{ (0)\mapsto(0,0), (1)\mapsto(1,0), (2)\mapsto(0,1), (3)\mapsto(1,1), (4)\mapsto(0,2), (5)\mapsto(1,2) \}\)
+    \item \NB{Column} major: Fortran
+    \item Left associative \(\Pi\)-type \\
+      \texttt{typedef Array<Array<T, \NB 2>, \NB 3> MyArray;}
+    \item Perhaps \(\tlaf \brm A\)?
+    \item Pick one, stick with it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Upshape} 
+  % UNFLAT
+  \pause
+  \begin{itemize}[<+->]
+    \item Factoring \(2412 = 12 \times 201\) (not neccesarily prime)
+    \item Have \(20\times 5\) array \(A\) --- 100 elements.
+    \item Desired: \(10 \times 10\) --- 100 elements.
+    \item Row major \(\implies\) column stride is 10, row stride is 1.
+    \item \(r = (c, r)\mapsto (10c + 1r), r : {\Nat_{<10}}^2 \to \Nat_{<100}\)
+    \item \(B = \flat A \circ r, \sharp B = [10\;10]\)
+    \item Convert to \NB{mixed radix}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Correspondece: Reshape}
+  % RESH
+  \pause
+  \begin{itemize}[<+->]
+    \item Re-factoring \(4\times 10 \times 9 = 8 \times 15 \times 3\)
+    \item Flatten, then un-flatten
+    \item Mixed radix conversion in general
+    \item From any shape to any shape: \NB{Reshape}
+    \item \(\varrho(A, [10\;10])\) as in APL
+    \item Flat and Upshape both special cases
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondence: Summary so far \#2}
+  \pause
+  \begin{itemize}[<+->]
+    \item Flatten, Upshape, Reshape
+    \item Row major or column major? ``Co-''relationship of some kind.
+    \item Two kinds of operations on coordinates: matrix multiplication, mixed radix conversion
+    \item Mixed radix conversion also preserves origin index
+    \item Lexicographic order not linear --- radix conversion is!
+    \item \(5\times3\times12\) becomes \((36\;\;12\;\;1) : 1 \times 3\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Map}
+  % CAT
+  \pause
+  \begin{itemize}[<+->]
+    \item Identity \([2\;3] \leadsto [2\;3]\)
+    \item Apply function to each entry, nothing controversial\\
+      \([1\;2\;3] \leadsto [\mrm A\;\mrm B\;\mrm C]\)
+    \item \NB{Postcompose}, \(f \circ \brm A\)
+    \item Changes type --- very versatile
+    \item Arrays of a given shape is a free functor.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Outer product}
+  % PROD
+  \pause
+  \begin{itemize}[<+->]
+    \item Concatenation \([2\;3], [3\;4] \leadsto [2\;3\;3\;4]\)
+    \item Multiplication \(2\times3 \;\times\; 3\times4\)
+    \item Split the entry coordinate, fetch from two arrays, pair up
+      entries
+      \[[1\;2\;3] \oprodby{} [4\;5\;6] \leadsto
+      \begin{bmatrix}
+        \langle1,4\rangle & \langle1,5\rangle & \langle1,6\rangle \\
+        \langle2,4\rangle & \langle2,5\rangle & \langle2,6\rangle \\
+        \langle3,4\rangle & \langle3,5\rangle & \langle3,6\rangle
+      \end{bmatrix}\]
+    \item Makes very big arrays
+    \item Pair with diagonal to get zip
+    \item Is a categorical product
+    \item To project into original arrays, fixate axes not in original
+      arrays and map with pair projection
+    \item Map with two-argument functions
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Reduce}
+  % REDUCE
+  \pause
+  \begin{itemize}[<+->]
+    \item Deletion \([2\;4\;3] \leadsto [2\;3]\)
+    \item Divide by constant \(\frac{2\times4\times3}4 = 2\times3\)
+    \item Collapse along an axis with binary operation
+      \[
+        \begin{bmatrix}
+          1 & 2 & 3 \\
+          4 & 5 & 6
+        \end{bmatrix} \leadsto
+        \begin{bmatrix}
+          (1 + 2 + 3) \\
+          (4 + 5 + 6) \\
+        \end{bmatrix}
+      \]
+    \item More ``pure'' than fixate: fixate has many ways,
+      reduce has only one.
+    \item Monoid $>$ semigroup $>$ magma/accumulator function
+    \item Free monoid (list/rank-1 array)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Subarray}
+  % REDUCE
+  \pause
+  \begin{itemize}[<+->]
+    \item Sub-sequence extraction \([2\;4\;5\;3\;6] \leadsto [2\;4\;3], [5\;6]\)
+    \item Factor? \(2\times4\times5\times3\times6 = (2\times4\times3)\times(5\times6)\)
+    \item Create array-of-arrays
+      \[
+        \begin{bmatrix}
+          1 & 2 & 3 \\
+          4 & 5 & 6
+        \end{bmatrix} \leadsto \big[[1\;4]\;\;[2\;5]\;\;[3\;6]\big]
+      \]
+    \item Loosely related to reduce by free monoid
+    \item Exponential object in category?
+    \item New! Figured this one out after Report was done!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Concatenate}
+  % CAT
+  \pause
+  \begin{itemize}[<+->]
+    \item Tensor addition \([2\;2] \oplus [2\;3] = [2\;\;(2+3)]\)
+    \item Concatenation
+      \[
+        \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} +\!\!\!+
+        \begin{bmatrix} 5 & 6 & 7 \\ 8 & 9 & 10 \end{bmatrix}
+        = \begin{bmatrix}
+          1 & 2 & 5 & 6 & 7 \\
+          3 & 4 & 8 & 9 & 10
+        \end{bmatrix}
+      \]
+    \item Sort of odd-one-out?
+    \item On rank-1 arrays, becomes free monoid operation
+    \item Rank-0 arrays (scalars) cannot be concatenated!
+    \item Rank-0 arrays trivially map to rank-1 arrays of shape \([1]\)
+    \item Also brand new!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Correspondece: Summary so far \#3}
+  % CAT
+  \pause
+  \begin{itemize}[<+->]
+    \item Operations that change the domain
+    \item Map, Reduce, Subarray, Outer Product
+    \item Odd-one-out: Concatenate
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Overview}
+  \pause
+  \begin{itemize}[<+->]
+    \item Base
+      \begin{itemize}[<+->]
+        \item Shape: domain axes' upper bounds
+        \item Index: function application
+      \end{itemize}
+    \item Precompose
+      \begin{itemize}[<+->]
+        \item Linear map: Transpose, Tile, Diagonal, ``Upshape from flat''
+        \item Affine map: Slice, Fixate
+        \item Monotonous map, (co)lexicographic order: Flat, Reshape
+      \end{itemize}
+    \item Postcompose: Map
+    \item Transformation:
+      \begin{itemize}[<+->]
+        \item Einstein notation: Reduce
+        \item Combinatorical: Outer Product
+        \item Select based on index: Concatenate
+        \item Enable currying: Subarray
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Futher grouping}
+  \pause
+  \begin{itemize}[<+->]
+    \item Preserves origin index \(\brm A (0,\dots,0) = F(\brm A)(0,\dots,0)\):
+    \item Transpose, Diagonal, Tile, Flat, Reshape, Reduce (sorta),
+      Outer Product (kinda), Subarray (ish), Concatenate (left)
+    \item Representable as matrix:
+    \item Transpose, Tile, Diagnoal, Upshape, Slice, Fixate
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Categorical ground}
+  \pause
+  \begin{itemize}[<+->]
+    \item The Arrow category on \(\brm{Set}\)
+    \item Not quite: Reduce \& friends.
+    \item Not a ``set with structure.''
+    \item \emph{Much} work to be done (for me.)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Diagram chasing}
+  % DIAGRAM
+  \pause
+  \begin{center}
+    \begin{tikzcd}[ampersand replacement=\&]
+      \Nat_{<k_0}\times\cdots\times\Nat_{<k_d} \ar[r, "A"] \ar[d, "\alpha"] \& S \ar[d, "\omega"] \\
+      \Nat_{<j_0}\times\cdots\times\Nat_{<j_e} \ar[r, "B"] \& T 
+    \end{tikzcd}\\[1em]
+    \pause
+
+    \begin{tikzcd}[ampersand replacement=\&]
+      \Nat_{<k_0}\times\cdots\times\Nat_{<k_d} \ar[r, "A"{name=UPPER}] \& S \\
+      \Nat_{<j_0}\times\cdots\times\Nat_{<j_e} \ar[r, "B"{name=LOWER}] \& T
+      \ar[from=UPPER, to=LOWER, double, shorten <= 4pt, "\Theta"]
+    \end{tikzcd}\\[1em]
+
+  \end{center}
+
+  \pause $\alpha$: Transpose, Tile, Diagonal, Slice, Fixate, Reverse
+
+  \pause $\omega$: Map
+
+  \pause $\Theta$: Reduce, Subarray
+
+  \pause Not shown: Outer product, Concatenate
+\end{frame}
+
+\begin{frame}
+  \frametitle{Practical part}
+  \pause
+  \begin{itemize}[<+->]
+    \item Rust --- the language of the future
+    \item No garbage collection --- no problem
+    \item Make pointers safe again
+    \item Numpy is not fast, not well-founded, solve both!
+    \item Inspired by NumPy: lexicographical order
+    \item Inspired by NumPy: builtin types are arrays too
+    \item As general as possible! (Probably bad idea)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Code: Design}
+  \pause
+  \begin{itemize}[<+->]
+    \item Traits for reference/mutable reference/owned data
+    \item \texttt{slice} and \texttt{mut\_slice} and \texttt{into\_slice}
+    \item 10+ methods and assocaited types each --- a lot of work
+    \item Generic slice type (matrix)
+    \item Generic reshape type (mixed radix conversion)
+    \item Separate lazy types for the rest
+    \item Implementation for Rust's sliceable types
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Code: Hard Truths}
+  \pause
+  \begin{itemize}[<+->]
+    \item I am not as proficient in Rust as I'd like to be
+    \item Return reference or value?
+    \item If reference, then what about lazy arrays?
+    \item Rust lacks Higher Kinded Polymorphism
+    \item \texttt{fn function<'lifetime>(\&'lifetime reference\_arg) -> \&'lifetime ResultType;}
+    \item Output type is parameterized on lifetime: no Associated HKP, no cookie
+    \item \texttt{trait Polymorphism \{\\
+            \ \ \ type LTPAssocType<'lifetime> = \&'lifetime i32;\\
+                  \}}
+    \item It compiles! It uses unsafe type casting! Unsound!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Code: futher work}
+  \pause
+  \begin{itemize}[<+->]
+    \item Hack to simulate lifetime parameterization
+    \item Trait with associated type that has void reference of same lifetime
+    \item \texttt{trait LT \{ type Void; \}\\
+      impl<'a, T> LT for \&'a T \{ type Void = \&'a (); \}}
+    \item Trait with associated type that has the lifetime replaced
+    \item \texttt{trait LTP<'a> \{ type Rep; \}\\
+      impl<'a, 'b, T> LTP<'b> for \&'b T \\
+      where Self : LP<Void=\&'a ()>\\
+      \{ type Rep = \&'a T; \}}
+    \item Return reference or value? Fake reference type
+    \item Behaves like reference, has \texttt{into\_inner} method
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusion}
+  \pause
+  \begin{itemize}[<+->]
+    \item Not trivial!
+    \item Not non-trivial!
+    \item Merits futher study
+    \item At least two papers in the works
+    \item Master thesis: the same but in Idris!
+  \end{itemize}
+\end{frame}
+
+\end{document}

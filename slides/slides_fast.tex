@@ -5,6 +5,8 @@
 \usepackage{bm}
 \usepackage{xcolor}
 
+\usepackage{tikz-cd}
+
 \newcommand\mrm[1]{\mathrm{#1}}
 \newcommand\brm[1]{\bm{\mrm{#1}}}
 \newcommand\Nat{\mathbb{N}}
@@ -23,7 +25,7 @@
 \newcommand\reduce{\operatorname*{\brm{reduce}\,}}
 \newcommand\diag{\operatorname*{\brm{diag}\,}}
 \newcommand\tile{\operatorname*{\brm{tile}\,}}
-\newcommand\oprodby[1]{\mathop{\operatorname*{\,\brm{by}}_{#1}}}
+\newcommand\oprodby[1]{\mathop{\operatorname*{\,\brm{by}}_{#1}\,}}
 
 \newcommand\NB[1]{\textcolor{red}{#1}}
 
@@ -145,6 +147,7 @@
     \item Precompose with projection
     \item \(\pi = (x, y) \mapsto (x)\)
     \item \(\sharp \brm A = [2] \implies \NB{\forall n.} \sharp(\brm A \circ \pi) = [2\ \NB n]\)
+    \item NumPy broadcasting
     \item Let \(n = 4\)
     \item Let \(\pi : \Nat_{<2} \times \Nat_{<4} \to \Nat_{<2}\)
     \item Generalises
@@ -178,7 +181,7 @@
         \begin{pmatrix}
           \NB 9 & 10 \\ 11 & \NB{12}
         \end{pmatrix}
-      \end{bmatrix} = 
+      \end{bmatrix}_3 = 
       \begin{bmatrix}
         (\NB 1\ 2) & (3\ \NB 4) \\
         (\NB 5\ 6) & (7\ \NB 8) \\
@@ -209,7 +212,7 @@
         [2\;5]
       \]
     \item Corner case: delete \([2] \leadsto []\)
-    \item Zero-dimensional arrays have 1 element: \([1\;\NB 2\;3] \leadsto \lceil 2\rfloor\)  
+    \item Zero-dimensional arrays have 1 element: \([1\;\NB 2\;3] \leadsto [2]_0\)
     \item Precompose with constant function
     \item \(k = (x)\mapsto (x, 2)\)
   \end{itemize}
@@ -250,7 +253,7 @@
     \item Tile \(\big(\begin{smallmatrix} 1 & 0 & 0 && 0 \\ 0 & 1 & 0 && 0 \end{smallmatrix}\big)\)
     \item Fixate \(\bigg(\begin{smallmatrix} 1 & 0 && 0 \\ 0 & 0 && 1 \\ 0 & 1 && 0 \end{smallmatrix}\bigg)\)
     \item Slice \(\big(\begin{smallmatrix} 1 & 0 && 1 \\ 0 & 2 && 0 \end{smallmatrix}\big)\)
-    \item Bonus: Reverse \(\big(\begin{smallmatrix} -1 & 0 && 0 \\ 0 & 1 && 0 \end{smallmatrix}\big)\)
+    \item Bonus: Reverse \(\big(\begin{smallmatrix} -1 & 0 && k_0-1 \\ 0 & 1 && 0 \end{smallmatrix}\big)\)
   \end{itemize}
 \end{frame}
 
@@ -344,10 +347,8 @@
   \frametitle{Correspondence: Summary so far \#2}
   %\pause
   \begin{itemize}%[<+->]
-    \item Flatten
-    \item Unflatten(?)
-    \item Reshape
-    \item Row major or column major?
+    \item Flatten, Upshape, Reshape
+    \item Row major or column major? ``Co-''relationship of some kind.
     \item Two kinds of operations on coordinates: matrix multiplication, mixed radix conversion
     \item Mixed radix conversion also preserves origin index
     \item Lexicographic order not linear --- radix conversion is!
@@ -380,9 +381,9 @@
       entries
       \[[1\;2\;3] \oprodby{} [4\;5\;6] \leadsto
       \begin{bmatrix}
-        (1,4) & (1,5) & (1,6) \\
-        (2,4) & (2,5) & (2,6) \\
-        (3,4) & (3,5) & (3,6)
+        \langle1,4\rangle & \langle1,5\rangle & \langle1,6\rangle \\
+        \langle2,4\rangle & \langle2,5\rangle & \langle2,6\rangle \\
+        \langle3,4\rangle & \langle3,5\rangle & \langle3,6\rangle
       \end{bmatrix}\]
     \item Makes very big arrays
     \item Pair with diagonal to get zip
@@ -413,7 +414,7 @@
       \]
     \item More ``pure'' than fixate: fixate has many ways,
       reduce has only one.
-    \item Monoid > semigroup > magma/accumulator function
+    \item Monoid $>$ semigroup $>$ magma/accumulator function
     \item Free monoid (list/rank-1 array)
   \end{itemize}
 \end{frame}
@@ -522,6 +523,34 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{Diagram chasing}
+  % DIAGRAM
+  %\pause
+  \begin{center}
+    \begin{tikzcd}[ampersand replacement=\&]
+      \Nat_{<k_0}\times\cdots\times\Nat_{<k_d} \ar[r, "A"] \ar[d, "\alpha"] \& S \ar[d, "\omega"] \\
+      \Nat_{<j_0}\times\cdots\times\Nat_{<j_e} \ar[r, "B"] \& T 
+    \end{tikzcd}\\[1em]
+    %\pause
+
+    \begin{tikzcd}[ampersand replacement=\&]
+      \Nat_{<k_0}\times\cdots\times\Nat_{<k_d} \ar[r, "A"{name=UPPER}] \& S \\
+      \Nat_{<j_0}\times\cdots\times\Nat_{<j_e} \ar[r, "B"{name=LOWER}] \& T
+      \ar[from=UPPER, to=LOWER, double, shorten <= 4pt, "\Theta"]
+    \end{tikzcd}\\[1em]
+
+  \end{center}
+
+  %\pause $\alpha$: Transpose, Tile, Diagonal, Slice, Fixate, Reverse
+
+  %\pause $\omega$: Map
+
+  %\pause $\Theta$: Reduce, Subarray
+
+  %\pause Not shown: Outer product, Concatenate
+\end{frame}
+
+\begin{frame}
   \frametitle{Practical part}
   %\pause
   \begin{itemize}%[<+->]
@@ -531,7 +560,7 @@
     \item Numpy is not fast, not well-founded, solve both!
     \item Inspired by NumPy: lexicographical order
     \item Inspired by NumPy: builtin types are arrays too
-    \item As general as possible! (Bad idea!)
+    \item As general as possible! (Probably bad idea)
   \end{itemize}
 \end{frame}
 
@@ -545,7 +574,7 @@
     \item Generic slice type (matrix)
     \item Generic reshape type (mixed radix conversion)
     \item Separate lazy types for the rest
-    \item Implementation for Rust's slicable types
+    \item Implementation for Rust's sliceable types
   \end{itemize}
 \end{frame}
 
@@ -560,7 +589,7 @@
     \item \texttt{fn function<'lifetime>(\&'lifetime reference\_arg) -> \&'lifetime ResultType;}
     \item Output type is parameterized on lifetime: no Associated HKP, no cookie
     \item \texttt{trait Polymorphism \{\\
-            type LifetimeParameterizedAssociatedType<'lifetime> = \&'lifetime i32;\\
+            \ \ \ type LTPAssocType<'lifetime> = \&'lifetime i32;\\
                   \}}
     \item It compiles! It uses unsafe type casting! Unsound!
   \end{itemize}
@@ -571,6 +600,14 @@
   %\pause
   \begin{itemize}%[<+->]
     \item Hack to simulate lifetime parameterization
+    \item Trait with associated type that has void reference of same lifetime
+    \item \texttt{trait LT \{ type Void; \}\\
+      impl<'a, T> LT for \&'a T \{ type Void = \&'a (); \}}
+    \item Trait with associated type that has the lifetime replaced
+    \item \texttt{trait LTP<'a> \{ type Rep; \}\\
+      impl<'a, 'b, T> LTP<'b> for \&'b T \\
+      where Self : LP<Void=\&'a ()>\\
+      \{ type Rep = \&'a T; \}}
     \item Return reference or value? Fake reference type
     \item Behaves like reference, has \texttt{into\_inner} method
   \end{itemize}

@@ -91,62 +91,39 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Minimal set of operations}
+  \frametitle{Minimal set of operations (1/2)}
   
-  \begin{multicols}{3}
-    \begin{itemize}
-      \item Transpose
-      \item Diagonal
-      \item Tile
-      \item Fixate
-      \item Slice
-      \item Reverse $^*$
-      \columnbreak
-      
-      \item Upshape $^*$
-      \item Flat
-      \item Reshape
-      \vfill
-      \item Map
-      \columnbreak
-
-      \item Reduce
-      \item Outer product
-      \item Concatenate $^*$
-      \item Subarray $^*$
-      \vfill
-    \end{itemize}
-  \end{multicols}
+  \footnotesize
+  \begin{center}
+    \begin{tabular}{lll}
+      \bfseries List & \bfseries Product & \bfseries Array  \\
+      Permute & Commutativity  & Transpose  \\
+      Remove duplicate & Square free number  & Diagonal  \\
+      Insert & Scale  & Tile  \\
+      Delete$^*$ & Divide by factor$^*$  & Fixate  \\
+      Vector subtraction & ?  & Slice  \\
+      ? & ? & Reverse $^*$  \\
+      Identity & Identity & Map 
+    \end{tabular}
+  \end{center}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Inspiration}
+  \frametitle{Minimal set of operations (2/2)}
   
-  \begin{multicols}{3}
-    \footnotesize
-    \begin{itemize}
-      \item Commutativity, permutation
-      \item Square-free, remove duplicates
-      \item Scale, insert
-      \item Delete, divide $^*$
-      \item Vector subtraction
-      \item ---
-      \columnbreak
-      
-      \item Factorization
-      \item Multiplication
-      \item Equality u/ mult.
-      \vfill
-      \item Identity
-      \columnbreak
-
-      \item Deltete, divide
-      \item Concatenate, multiply
-      \item Tensor addition
-      \item Commutativity, subsequence extraction
-      \vfill
-    \end{itemize}
-  \end{multicols}
+  \footnotesize
+  \begin{center}
+    \begin{tabular}{lll}
+      \bfseries List & \bfseries Product & \bfseries Array  \\
+      ? & Compute & Flatten \\
+      ? & Factorize & Upshape \\
+      ? & Refactorize & Reshape \\
+      Delete & Divide by factor & Reduce \\
+      Concatenate & Carthesian product & Outer product \\
+      Subsequence extraction & Commutativity$^*$ & Subarray$^*$ \\
+      Tensor sum & ? & Concatenation$^*$
+    \end{tabular}
+  \end{center}
 \end{frame}
 
 \begin{frame}

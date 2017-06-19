@@ -42,8 +42,8 @@
 
 \begin{frame}
   \frametitle{What?! Why?!}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item NumPy, Mathematica, GNU Octave, APL, J, K
     \item C (row major) vs. Fortran (column major)
     \item ``Who needs anything other than Matix Products?''
@@ -55,8 +55,8 @@
 
 \begin{frame}
   \frametitle{What is a multidimensional array?}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Mapping from coordinates to arbitrary codomain
     \item Coordinates in higher-dimensional space
     \item Integer coordinates only
@@ -67,8 +67,8 @@
 
 \begin{frame}
   \frametitle{Terminology}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Rank: \(d\)
     \item Coordinate: \(\brm c = (c_0,\dots,c_d)\)
     \item Indexes: \(c_0,\dots,c_d\)
@@ -81,8 +81,8 @@
 \begin{frame}
   \frametitle{The Shape of an array}
   % SHAPE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Product order:\\
       \((a, b) < (a', b') \iff a < a' \land b < b'\)\\
       \((a, b) \le (a', b') \iff a \le a' \land b \le b'\)
@@ -95,8 +95,8 @@
 \begin{frame}
   \frametitle{Shape description}
   % DESC
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item A rank-1 array, a list
     \item Number of elements is precisely product of shape
     \item \(|\brm A| = \prod_{i=0}^d \sharp \brm A (i)\)
@@ -107,8 +107,8 @@
 
 \begin{frame}
   \frametitle{Correspondece Part 1}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Permute \([2\ 3] \leadsto [3\ 2]\) --- 
     commutativity \(2\times3 = 3\times2\)
     \item Insert \([2] \leadsto [2\;4]\) --- scale \(2\leadsto 2\times 4\)
@@ -121,8 +121,8 @@
 
 \begin{frame}
   \frametitle{Correspondece Part 1}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Permute/commutativity --- Transpose \(
       \begin{bmatrix}
         \NB 1 & 2 & 3 \\
@@ -167,8 +167,8 @@
 \begin{frame}
   \frametitle{Correspondece: Diagonal}
   % DIAG
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Remove non-unique \([3\ 2\ 2] \leadsto [3\ 2]\)
     \item Square free \(3\times 2\times 2\leadsto 3 \times 2\)
     \item \NB{Diagonal} \(
@@ -209,8 +209,8 @@
 \begin{frame}
   \frametitle{Correspondece: Indexing Generalized}
   % FIXATE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Delete \([2\;3] \leadsto [2]\)
     \item Index/extract/project subarray/row/column
       \[
@@ -229,8 +229,8 @@
 \begin{frame}
   \frametitle{Correspondece: Slice}
   % SLICE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Vector subtraction \( [3\;5] - [1\;2] = [2\;3] \)
     \item Slice with stride
       \[
@@ -252,8 +252,8 @@
 
 \begin{frame}
   \frametitle{Correspondece: Key insight}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Transpose, Diagonal, Tile, Fixate, Slice.
     \item Can be modeled as linear transforms in homogenous coordinates.
     \item Transpose \(\bigg(\begin{smallmatrix} 1 & 0 & 0 && 0 \\ 0 & 0 & 1 && 0 \\ 0 & 1 & 0 && 0 \end{smallmatrix}\bigg)\)
@@ -267,8 +267,8 @@
 
 \begin{frame}
   \frametitle{Correspondece: Summary so far \#1}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Precompose with linear or affine function in natural coordinates \(f : \Nat^q \to \Nat^d\).
     \item Linear: transpose, diagonal, tile, reverse
     \item Preserves origin index \(A(0, \dots, 0) = (A \circ f)(0, \dots, 0)\)
@@ -279,8 +279,8 @@
 \begin{frame}
   \frametitle{Correspondece: Flat}
   % FLAT
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Compute product \(2 \times 3 = 6\)
     \item Reduce by multiplication \(\left[\prod_{i=0}^1 [2\ 3](i)\right] = [ 6 ]\)
     \item ``Vectorize'' or \NB{Flatten} \[
@@ -303,8 +303,8 @@
 \begin{frame}
   \frametitle{Correspondece: Flat 2}
   % TLAF
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Or? $
       \begin{bmatrix}
         1 & 2 & 3 \\
@@ -324,8 +324,8 @@
 \begin{frame}
   \frametitle{Correspondece: Upshape} 
   % UNFLAT
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Factoring \(2412 = 12 \times 201\) (not neccesarily prime)
     \item Have \(20\times 5\) array \(A\) --- 100 elements.
     \item Desired: \(10 \times 10\) --- 100 elements.
@@ -340,8 +340,8 @@
 \begin{frame}
   \frametitle{Correspondece: Reshape}
   % RESH
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Re-factoring \(4\times 10 \times 9 = 8 \times 15 \times 3\)
     \item Flatten, then un-flatten
     \item Mixed radix conversion in general
@@ -353,8 +353,8 @@
 
 \begin{frame}
   \frametitle{Correspondence: Summary so far \#2}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Flatten, Upshape, Reshape
     \item Row major or column major? ``Co-''relationship of some kind.
     \item Two kinds of operations on coordinates: matrix multiplication, mixed radix conversion
@@ -367,8 +367,8 @@
 \begin{frame}
   \frametitle{Correspondece: Map}
   % CAT
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Identity \([2\;3] \leadsto [2\;3]\)
     \item Apply function to each entry, nothing controversial\\
       \([1\;2\;3] \leadsto [\mrm A\;\mrm B\;\mrm C]\)
@@ -381,8 +381,8 @@
 \begin{frame}
   \frametitle{Correspondece: Outer product}
   % PROD
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Concatenation \([2\;3], [3\;4] \leadsto [2\;3\;3\;4]\)
     \item Multiplication \(2\times3 \;\times\; 3\times4\)
     \item Split the entry coordinate, fetch from two arrays, pair up
@@ -405,8 +405,8 @@
 \begin{frame}
   \frametitle{Correspondece: Reduce}
   % REDUCE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Deletion \([2\;4\;3] \leadsto [2\;3]\)
     \item Divide by constant \(\frac{2\times4\times3}4 = 2\times3\)
     \item Collapse along an axis with binary operation
@@ -430,8 +430,8 @@
 \begin{frame}
   \frametitle{Correspondece: Subarray}
   % REDUCE
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Sub-sequence extraction \([2\;4\;5\;3\;6] \leadsto [2\;4\;3], [5\;6]\)
     \item Factor? \(2\times4\times5\times3\times6 = (2\times4\times3)\times(5\times6)\)
     \item Create array-of-arrays
@@ -450,8 +450,8 @@
 \begin{frame}
   \frametitle{Correspondece: Concatenate}
   % CAT
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Tensor addition \([2\;2] \oplus [2\;3] = [2\;\;(2+3)]\)
     \item Concatenation
       \[
@@ -473,8 +473,8 @@
 \begin{frame}
   \frametitle{Correspondece: Summary so far \#3}
   % CAT
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Operations that change the domain
     \item Map, Reduce, Subarray, Outer Product
     \item Odd-one-out: Concatenate
@@ -483,22 +483,22 @@
 
 \begin{frame}
   \frametitle{Overview}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Base
-      \begin{itemize}[<+->]
+      \begin{itemize}%[<+->]
         \item Shape: domain axes' upper bounds
         \item Index: function application
       \end{itemize}
     \item Precompose
-      \begin{itemize}[<+->]
+      \begin{itemize}%[<+->]
         \item Linear map: Transpose, Tile, Diagonal, ``Upshape from flat''
         \item Affine map: Slice, Fixate
         \item Monotonous map, (co)lexicographic order: Flat, Reshape
       \end{itemize}
     \item Postcompose: Map
     \item Transformation:
-      \begin{itemize}[<+->]
+      \begin{itemize}%[<+->]
         \item Einstein notation: Reduce
         \item Combinatorical: Outer Product
         \item Select based on index: Concatenate
@@ -509,8 +509,8 @@
 
 \begin{frame}
   \frametitle{Futher grouping}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Preserves origin index \(\brm A (0,\dots,0) = F(\brm A)(0,\dots,0)\):
     \item Transpose, Diagonal, Tile, Flat, Reshape, Reduce (sorta),
       Outer Product (kinda), Subarray (ish), Concatenate (left)
@@ -521,8 +521,8 @@
 
 \begin{frame}
   \frametitle{Categorical ground}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item The Arrow category on \(\brm{Set}\)
     \item Not quite: Reduce \& friends.
     \item Not a ``set with structure.''
@@ -533,13 +533,13 @@
 \begin{frame}
   \frametitle{Diagram chasing}
   % DIAGRAM
-  \pause
+  %\pause
   \begin{center}
     \begin{tikzcd}[ampersand replacement=\&]
       \Nat_{<k_0}\times\cdots\times\Nat_{<k_d} \ar[r, "A"] \ar[d, "\alpha"] \& S \ar[d, "\omega"] \\
       \Nat_{<j_0}\times\cdots\times\Nat_{<j_e} \ar[r, "B"] \& T 
     \end{tikzcd}\\[1em]
-    \pause
+    %\pause
 
     \begin{tikzcd}[ampersand replacement=\&]
       \Nat_{<k_0}\times\cdots\times\Nat_{<k_d} \ar[r, "A"{name=UPPER}] \& S \\
@@ -549,19 +549,19 @@
 
   \end{center}
 
-  \pause $\alpha$: Transpose, Tile, Diagonal, Slice, Fixate, Reverse
+  %\pause $\alpha$: Transpose, Tile, Diagonal, Slice, Fixate, Reverse
 
-  \pause $\omega$: Map
+  %\pause $\omega$: Map
 
-  \pause $\Theta$: Reduce, Subarray
+  %\pause $\Theta$: Reduce, Subarray
 
-  \pause Not shown: Outer product, Concatenate
+  %\pause Not shown: Outer product, Concatenate
 \end{frame}
 
 \begin{frame}
   \frametitle{Practical part}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Rust --- the language of the future
     \item No garbage collection --- no problem
     \item Make pointers safe again
@@ -574,8 +574,8 @@
 
 \begin{frame}
   \frametitle{Code: Design}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Traits for reference/mutable reference/owned data
     \item \texttt{slice} and \texttt{mut\_slice} and \texttt{into\_slice}
     \item 10+ methods and assocaited types each --- a lot of work
@@ -588,8 +588,8 @@
 
 \begin{frame}
   \frametitle{Code: Hard Truths}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item I am not as proficient in Rust as I'd like to be
     \item Return reference or value?
     \item If reference, then what about lazy arrays?
@@ -605,8 +605,8 @@
 
 \begin{frame}
   \frametitle{Code: futher work}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Hack to simulate lifetime parameterization
     \item Trait with associated type that has void reference of same lifetime
     \item \texttt{trait LT \{ type Void; \}\\
@@ -623,8 +623,8 @@
 
 \begin{frame}
   \frametitle{Conclusion}
-  \pause
-  \begin{itemize}[<+->]
+  %\pause
+  \begin{itemize}%[<+->]
     \item Not trivial!
     \item Not non-trivial!
     \item Merits futher study

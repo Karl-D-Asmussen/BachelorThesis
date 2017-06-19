@@ -1,0 +1,3 @@
+#/bin/zsh
+sed 's/\[<+->\]\|\\pause/%&/;' slides2.tex > slides2_fast.tex
+xelatex -file-line-error -halt-on-error slides2_fast.tex && xelatex -file-line-error -halt-on-error slides2.tex 

@@ -1,0 +1,29 @@
+
+# Multidimensional Arrays: Formally Specified by Shape Description and Sliced with Affine Functions
+
+* A correspondence between list operations on shape lists and operations on arrays.
+* Using this perspective of reasoning we can explain away e.g. the difference between
+  C arrays and Fortran arrays, as well as decomposing the matrix product into more
+  fundamental operations.
+* We also find an efficient way to construct multidimensional arrays from flat arrays
+  in memory using affine functionals and a construction of expressive slicing operations
+  gounded in matrix multiplication in homogenous coordinates.
+
+
+* Rank, Shape, Index, Arrays-as-functions.
+* Minimal set of operations:
+  Transpose, Tile, Diagonal, Slice, Fixate, Reverse, Upshape, Flat, Reshape, Map, Reduce, Outer product, Concatenate, Subarray.  
+  List op <-> product interpretation <-> array operation
+* Precompose:  
+  Homogenous/affine map (matrix)  
+  Monotonic map in (co)lexicographical order on domain
+* Postcompose: Map
+* HOF:  
+  Decision-making
+* Preservation of origin index.  
+  Not: Concatenate, Slice, Fixate, Reverse
+  
+
+* Categorical modeling
+* Implementation: eliminating copying using Rust.
+

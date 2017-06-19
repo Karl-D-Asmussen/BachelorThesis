@@ -1,0 +1,259 @@
+\documentclass[xetex,mathserif,serif]{beamer}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{multicol}
+\usepackage{xcolor}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.markings, arrows}
+\usepackage{tikz-cd}
+
+\newcommand\mrm[1]{\mathrm{#1}}
+\newcommand\msc[1]{\normalfont\textsc{#1}}
+\newcommand\brm[1]{\bm{\mrm{#1}}}
+\newcommand\Nat{\mathbb{N}}
+\newcommand\Zheil{\mathbb{Z}}
+\newcommand\Real{\mathbb{R}}
+\newcommand\Com{\mathbb{C}}
+\newcommand\Arr[1]{{\brm{Arr}_{\brm{#1}}}}
+\newcommand\SFR{\sharp\flat\varrho}
+\newcommand\SSFR{\sigma\sharp\flat\varrho}
+\newcommand\DSSFR{\div\sigma\sharp\flat\varrho}
+\newcommand\ADSSFR{\approx\div\sigma\sharp\flat\varrho}
+\newcommand\CADSSFR{c\cdot\approx\div\sigma\sharp\flat\varrho}
+\newcommand\XCADSSFR{\times c\cdot\approx\div\sigma\sharp\flat\varrho}
+\newcommand\impl{\mathrel{\Rightarrow}}
+\newcommand\tlaf{\mathop{\rotatebox[origin=c]{180}{$\flat$}}}
+\newcommand\reduce{\operatorname*{\brm{reduce}\,}}
+\newcommand\diag{\operatorname*{\brm{diag}\,}}
+\newcommand\tile{\operatorname*{\brm{tile}\,}}
+\newcommand\oprodby[1]{\mathop{\operatorname*{\,\brm{by}}_{#1}\,}}
+
+\newcommand\pto{\mathrel{\ooalign{\hfil$\mapstochar\mkern5mu$\hfil\cr$\to$\cr}}}
+
+\newcommand\NB[1]{\textcolor{red}{#1}}
+
+\begin{document}
+
+\begin{frame}
+  \begin{center}
+    \usebeamercolor[fg]{title}
+    {\Large Multidimensional Arrays: Formally Specified by Shape Description and Sliced by Affine Functions}\\[1em]
+    Bachelor's thesis by Karl D. Asmussen \\
+    Thesis advisor Jyrki Katajainen
+  \end{center}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Core definitions}
+  
+  \begin{itemize}
+    \item Array : integer coordinates $\pto$ set of entries
+    \item Rank is \#dimensions
+    \item Shape is bounding box corner
+    \item Indexing is function application
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Core definitions --- Example}
+  
+  \begin{tabular}{lll}
+    \vspace{0.2em}
+    Array &
+    \(\brm A = [0\ 100\ 200\ 300]\) &
+    \(\brm B = \begin{bmatrix}
+        00 & 01 & 02 \\
+        10 & 11 & 12 \\
+        20 & 21 & 22
+      \end{bmatrix}\)  \\
+      Shape &
+      \(\sharp\brm A = [4]\) & \(\sharp\brm B = [3\ 3]\)  \\
+      Rank &
+      \(\sharp\sharp\brm A = [1]\) & \(\sharp\sharp\brm B = [2]\)  \\
+      Index &
+      \(\brm A(2) = 200\) & \(\brm B(1, 2) = 12\)
+  \end{tabular}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Thesis}
+  
+  \begin{itemize}
+    \item Operations on shape lists $\iff$ operations on arrays
+    \item Operations on shape products $\iff$ operations on arrays
+    \item Deep theory $\implies$ powerful understanding
+    \item Extant: Ad hoc
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Minimal set of operations}
+  
+  \begin{multicols}{3}
+    \begin{itemize}
+      \item Transpose
+      \item Diagonal
+      \item Tile
+      \item Fixate
+      \item Slice
+      \item Reverse $^*$
+      \columnbreak
+      
+      \item Upshape $^*$
+      \item Flat
+      \item Reshape
+      \vfill
+      \item Map
+      \columnbreak
+
+      \item Reduce
+      \item Outer product
+      \item Concatenate $^*$
+      \item Subarray $^*$
+      \vfill
+    \end{itemize}
+  \end{multicols}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Inspiration}
+  
+  \begin{multicols}{3}
+    \footnotesize
+    \begin{itemize}
+      \item Commutativity, permutation
+      \item Square-free, remove duplicates
+      \item Scale, insert
+      \item Delete, divide $^*$
+      \item Vector subtraction
+      \item ---
+      \columnbreak
+      
+      \item Factorization
+      \item Multiplication
+      \item Equality u/ mult.
+      \vfill
+      \item Identity
+      \columnbreak
+
+      \item Deltete, divide
+      \item Concatenate, multiply
+      \item Tensor addition
+      \item Commutativity, subsequence extraction
+      \vfill
+    \end{itemize}
+  \end{multicols}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Pre-/postcompositional operations}
+  
+  \begin{itemize}
+    \item Precompose:
+    \begin{itemize}
+      \item Linear transform: Transpose, Diagonal, Tile, Upshape$^*$
+      \item Homogenous/Affine transform: Fixate, Reverse, Slice
+      \item Monotonous map: Upshape, Flat, Reshape
+    \end{itemize}
+    \item Postcompose: Map
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Higher-order operations}
+  
+  \begin{itemize}
+    \item Outer product --- categorical product
+    \item Reduce --- fold
+    \item Subarray --- maybe exponential?
+    \item Concatenate --- odd-one-out
+  \end{itemize}
+\end{frame}
+
+\tikzset{
+  -|->/.style={
+    decoration={
+      markings,
+      mark=at position #1 with {\arrow{|}},
+      mark=at position 1.0 with {\arrow{>}}
+    },
+    postaction={decorate}
+  },
+  -|->/.default=0.5 
+}
+
+\begin{frame}
+  \frametitle{Category theory}
+  
+  \begin{center}
+    \begin{tikzcd}[ampersand replacement=\&]
+      \Zheil^d \ar[-|->, r, "A"] \ar[d, "\alpha", swap] \& S \ar[d, "\omega"] \\
+      \Zheil^g \ar[-|->, r, "B", swap] \& T 
+    \end{tikzcd}\\[2em]
+    
+
+    \begin{tikzcd}[ampersand replacement=\&]
+      \Zheil^d \ar[-|->, r, "A"{name=UPPER}] \& S \\
+      \Zheil^g \ar[-|->, r, "B"{name=LOWER}, swap] \& T
+      \ar[-implies, from=UPPER, to=LOWER, double, shorten <= 5pt, shorten >= 5pt, "\Theta"]
+    \end{tikzcd}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Preservation of origin entry}
+  
+  \begin{multicols}{2}
+    \begin{itemize}
+      \item Transpose
+      \item Diagonal
+      \item Tile
+      \item Upshape
+      \item Flat
+      \item Reshape
+      \vfill
+      \columnbreak
+
+      \item Map
+      \item Reduce
+      \item Outer product
+      \item Subarray\\[2em]
+      \item Concatenate
+    \end{itemize}
+  \end{multicols}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Implementation}
+  
+  \begin{multicols}{2}
+  \begin{itemize}
+    \item Rust --- ML
+    \item NumPy --- general
+    \item Owned/Reference
+    \item Reference/Mutable
+    \item Lifetimes
+    \item $\neg$HKP
+    \columnbreak
+
+    \item Big traits
+    \item Boilerplate
+    \item Perlisism \#15
+    \item Compiles, but unsound
+    \item v0.9$\alpha$ to v1.0$\beta$
+  \end{itemize}
+  \end{multicols}
+\end{frame}
+
+\begin{frame}
+  \frametitle{}
+  \begin{itemize}
+    \item Work in progress
+  \end{itemize}
+\end{frame}
+
+\end{document}
